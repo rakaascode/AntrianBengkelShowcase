@@ -1,4 +1,4 @@
-package dev.inteiintel.teduhserviceapp.ui.main.queues
+package dev.inteiintel.teduhserviceapp.presentation.main.notifications
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,10 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
+
 @Composable
-fun QueuesScreen(){
+fun NotificationsScreen(){
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
 
-        Text("Queues Screen")
+        Text("Notifications Screen")
     }
 }

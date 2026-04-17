@@ -1,4 +1,4 @@
-package dev.inteiintel.teduhserviceapp.ui.main.settings
+package dev.inteiintel.teduhserviceapp.presentation.main.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import dev.inteiintel.teduhqueuesapp.ui.main.LogoutButtonTest
-import dev.inteiintel.teduhserviceapp.ui.auth.AuthViewModel
+import dev.inteiintel.teduhserviceapp.presentation.auth.AuthViewModel
 
 
 @Composable

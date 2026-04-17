@@ -1,4 +1,4 @@
-package dev.inteiintel.teduhserviceapp.ui.auth
+package dev.inteiintel.teduhserviceapp.presentation.auth
 
 import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
@@ -48,10 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import dev.inteiintel.teduhserviceapp.R
 import dev.inteiintel.teduhserviceapp.data.model.OnBoarding
-import dev.inteiintel.teduhserviceapp.navigation.Screen
+import dev.inteiintel.teduhserviceapp.utils.navigation.Screen
 import dev.inteiintel.teduhserviceapp.ui.theme.DarkOrange
 import dev.inteiintel.teduhserviceapp.ui.theme.DarkSlate
 import dev.inteiintel.teduhserviceapp.ui.theme.DimGray

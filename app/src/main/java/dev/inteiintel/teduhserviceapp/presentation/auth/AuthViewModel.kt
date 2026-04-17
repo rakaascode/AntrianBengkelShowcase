@@ -1,4 +1,4 @@
-package dev.inteiintel.teduhserviceapp.ui.auth
+package dev.inteiintel.teduhserviceapp.presentation.auth
 
 import android.content.Context
 import android.widget.Toast

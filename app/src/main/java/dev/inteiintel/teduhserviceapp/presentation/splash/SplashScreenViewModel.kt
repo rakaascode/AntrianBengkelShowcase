@@ -1,4 +1,4 @@
-package dev.inteiintel.teduhserviceapp.ui.splash
+package dev.inteiintel.teduhserviceapp.presentation.splash
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

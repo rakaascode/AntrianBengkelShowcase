@@ -1,4 +1,4 @@
-package dev.inteiintel.teduhserviceapp.navigation
+package dev.inteiintel.teduhserviceapp.utils.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,7 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dev.inteiintel.teduhqueuesapp.ui.main.MainScreen
 import dev.inteiintel.teduhserviceapp.data.local.TokenManager
-import dev.inteiintel.teduhserviceapp.ui.auth.AuthLoginScreen
+import dev.inteiintel.teduhserviceapp.presentation.auth.AuthLoginScreen
 
 @Composable
 fun AppNavGraph(){

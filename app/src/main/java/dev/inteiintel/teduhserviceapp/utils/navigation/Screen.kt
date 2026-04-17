@@ -1,4 +1,4 @@
-package dev.inteiintel.teduhserviceapp.navigation
+package dev.inteiintel.teduhserviceapp.utils.navigation
 
 sealed class Screen(val route: String) {
     object Splash: Screen("splash")

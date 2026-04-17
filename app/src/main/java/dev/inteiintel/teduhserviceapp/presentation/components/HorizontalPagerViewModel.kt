@@ -1,4 +1,4 @@
-package dev.inteiintel.teduhserviceapp.ui.components
+package dev.inteiintel.teduhserviceapp.presentation.components
 
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
