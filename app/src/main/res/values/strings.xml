@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">LTeduh Antre</string>
+
+    <string name="title_ob_satu">Pengalaman  Servis</string>
+    <string name="title_ob_satu_1">Tanpa Menunggu</string>
+    <string name="sub_title_ob_satu">Ambil antrian servis tanpa perlu menunggu\nlama. Nikmati kemudahan pengelolaan\nmotor Anda dalam genggaman.</string>
+
+    <string name="title_ob_dua">Temukan Bengkel</string>
+    <string name="title_ob_dua_1">Resmi Yamaha Terdekat</string>
+    <string name="sub_title_ob_dua">Lihat cabang Yamaha Lautan Teduh di\nsekitar Anda dan cek slot antrian servis\nyang tersedia di Lampung.</string>
+
+    <string name="title_ob_tiga">Semua Antrian</string>
+    <string name="title_ob_tiga_1">dalam Genggaman</string>
+    <string name="sub_title_ob_tiga">Pantau status antrian, lihat riwayat servis,\ndan aktifkan pengingat servis dengan\nmudah.</string>
+
+</resources>
