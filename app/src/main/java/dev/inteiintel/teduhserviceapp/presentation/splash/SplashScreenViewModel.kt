@@ -17,9 +17,9 @@ class SplashScreenViewModel: ViewModel() {
 
     fun checkLogin(context: Context) {
         viewModelScope.launch {
-            TokenManager(context).isLoggedIn() // cuma trigger read
+            TokenManager(context).isLoggedIn()
 
-            delay(300)
+            delay(30)
             _isSplashScreenVisible.value = false
         }
     }

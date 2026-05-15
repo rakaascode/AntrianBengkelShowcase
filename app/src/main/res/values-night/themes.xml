@@ -1,7 +1,33 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-  <!-- Base application theme. -->
-  <style name="Base.Theme.TeduhServiceSplashScreen" parent="Theme.Material3.DayNight.NoActionBar">
-    <!-- Customize your dark theme here. -->
-    <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+
+  <style name="Base.Theme.TeduhServiceSplashScreen"
+      parent="Theme.Material3.DayNight.NoActionBar">
+
+    <!-- WARNA BACKGROUND SPLASH -->
+    <item name="windowSplashScreenBackground">@color/prim_blue</item>
+
+    <!-- ICON UTAMA SPLASH -->
+    <item name="windowSplashScreenAnimatedIcon">
+      @drawable/animation_holder
+    </item>
+
+    <item name="android:windowSplashScreenBrandingImage">
+      @drawable/ic_version_1_0
+    </item>
+
+    <!-- THEME SETELAH SPLASH -->
+    <item name="postSplashScreenTheme">
+      @style/Theme.TeduhServiceApp
+    </item>
+
+    <!-- STATUS BAR -->
+    <item name="android:statusBarColor">@color/white</item>
+
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+
+    <!-- ICON STATUS BAR (true = gelap, false = terang) -->
+    <item name="android:windowLightStatusBar">true</item>
+
   </style>
+
 </resources>

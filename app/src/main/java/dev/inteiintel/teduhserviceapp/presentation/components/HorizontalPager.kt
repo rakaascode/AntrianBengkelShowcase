@@ -8,7 +8,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun HorizontalPager(viewModel: HorizontalPagerViewModel = viewModel()){
-        val data = viewModel.getDataOnBoarding.collectAsState()
+        val data = viewModel.getDataOnBoardingModel.collectAsState()
         LazyColumn {
             itemsIndexed (data.value){ index, item ->
 //                Image(painter = painterResource(item.Image), contentDescription = null, Modifier.aspectRatio(2f))

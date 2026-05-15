@@ -46,10 +46,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import dev.inteiintel.teduhserviceapp.R
-import dev.inteiintel.teduhserviceapp.data.model.OnBoarding
+import dev.inteiintel.teduhserviceapp.data.model.OnBoardingModel
 import dev.inteiintel.teduhserviceapp.utils.navigation.Screen
 import dev.inteiintel.teduhserviceapp.ui.theme.DarkOrange
 import dev.inteiintel.teduhserviceapp.ui.theme.DarkSlate
@@ -58,13 +58,13 @@ import dev.inteiintel.teduhserviceapp.ui.theme.MidnightBlue
 import kotlinx.coroutines.delay
 
 @Composable
-fun AuthLoginScreen(viewModel: AuthViewModel= viewModel (),navController: NavController){
+fun AuthLoginScreen(viewModel: AuthViewModel= hiltViewModel (), navController: NavController){
     val context = LocalContext.current
     val loadingState = viewModel.loading.collectAsState()
 
     val pagerState = rememberPagerState(pageCount = {3})
 
-    val onBoardingContentState by  viewModel.getDataOnBoarding.collectAsState()
+    val onBoardingContentState by  viewModel.getDataOnBoardingModel.collectAsState()
 
     LaunchedEffect(pagerState) {
         while (true) {
@@ -162,9 +162,9 @@ fun AuthLoginScreen(viewModel: AuthViewModel= viewModel (),navController: NavCon
 
 
 @Composable
-fun OnBoardingContent(currentPageIndex: Int, contentOnBoarding: List<OnBoarding>)
+fun OnBoardingContent(currentPageIndex: Int, contentOnBoardingModel: List<OnBoardingModel>)
 {
-    val item =contentOnBoarding[currentPageIndex]
+    val item =contentOnBoardingModel[currentPageIndex]
 
     Column (Modifier.fillMaxWidth().fillMaxHeight(), verticalArrangement = Arrangement.Center){
 
