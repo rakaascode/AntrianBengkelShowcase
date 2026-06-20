@@ -49,24 +49,183 @@ This project demonstrates how to implement ML Kit's scanner functionality in a m
 ### Project Structure
 
 ```
-app/
-├── data/
-│   └── scanner/
-│       ├── MLKitBarcodeScanner.kt    # Barcode scanning implementation
-│       └── MLKitTextRecognizer.kt    # Text recognition implementation
-├── domain/
-│   └── model/
-│       └── ScanResult.kt             # Domain models
-├── presentation/
-│   ├── text/
-│   │   ├── TextRecognitionScreen.kt  # Text recognition UI
-│   │   └── TextRecognitionViewModel.kt
-│   ├── home/
-│   │   └── HomeScreen.kt             # Main navigation
-│   └── components/
-│       └── CameraPreview.kt          # Reusable camera component
-└── di/
-    └── AppModule.kt                  # Dependency injection
+app
+└── src
+    ├── main
+    │   ├── AndroidManifest.xml
+    │   ├── java
+    │   │   └── dev
+    │   │       └── inteiintel
+    │   │           └── teduhserviceapp
+    │   │               ├── data
+    │   │               │   ├── local
+    │   │               │   │   ├── room
+    │   │               │   │   │   ├── AntrianDao.kt
+    │   │               │   │   │   ├── AppDatabase.kt
+    │   │               │   │   │   └── SavedAntrianEntity.kt
+    │   │               │   │   └── TokenManager.kt
+    │   │               │   ├── mapper
+    │   │               │   │   └── DataMapperSaved.kt
+    │   │               │   ├── model
+    │   │               │   │   ├── AntreanActiveModel.kt
+    │   │               │   │   ├── AuthModel.kt
+    │   │               │   │   ├── BranchModel.kt
+    │   │               │   │   ├── CreateAntreanModel.kt
+    │   │               │   │   ├── DetailNotificationsModel.kt
+    │   │               │   │   ├── MessageResponse.kt
+    │   │               │   │   ├── NotificationData.kt
+    │   │               │   │   ├── OnBoardingModel.kt
+    │   │               │   │   ├── ReminderModels.kt
+    │   │               │   │   ├── RingkasanHomeModel.kt
+    │   │               │   │   ├── ui
+    │   │               │   │   │   ├── AntreanSuccess.kt
+    │   │               │   │   │   ├── CabangUiModel.kt
+    │   │               │   │   │   ├── CreateAntrianUIState.kt
+    │   │               │   │   │   ├── KendaraanTersimpanUiModel.kt
+    │   │               │   │   │   ├── KonfirmasiAntreanUiModel.kt
+    │   │               │   │   │   ├── StnkUiState.kt
+    │   │               │   │   │   └── UiState.kt
+    │   │               │   │   └── UserModel.kt
+    │   │               │   ├── remote
+    │   │               │   │   ├── ApiClient.kt
+    │   │               │   │   ├── ApiServices.kt
+    │   │               │   │   └── AuthInterceptor.kt
+    │   │               │   └── repository
+    │   │               │       ├── AmbilAntreanRepository.kt
+    │   │               │       ├── AntreanActiveRepository.kt
+    │   │               │       ├── AuthRepository.kt
+    │   │               │       ├── BranchRepository.kt
+    │   │               │       ├── DetailBranchRepository.kt
+    │   │               │       ├── DetailNotificationsRepository.kt
+    │   │               │       ├── NotificationsRepository.kt
+    │   │               │       ├── ReminderRepository.kt
+    │   │               │       ├── RingkasanHomeRepository.kt
+    │   │               │       ├── SavedAntrianRepository.kt
+    │   │               │       └── UserRepository.kt
+    │   │               ├── di
+    │   │               │   └── AppModule.kt
+    │   │               ├── domain
+    │   │               │   ├── model
+    │   │               │   └── usecase
+    │   │               ├── MainActivity.kt
+    │   │               ├── MyApp.kt
+    │   │               ├── presentation
+    │   │               │   ├── auth
+    │   │               │   │   ├── AuthLoginScreen.kt
+    │   │               │   │   └── AuthViewModel.kt
+    │   │               │   ├── components
+    │   │               │   │   ├── HorizontalPager.kt
+    │   │               │   │   └── HorizontalPagerViewModel.kt
+    │   │               │   ├── main
+    │   │               │   │   ├── components
+    │   │               │   │   │   ├── ScanStnkScreen.kt
+    │   │               │   │   │   ├── TopAppBar.kt
+    │   │               │   │   │   └── ViewModelOCR.kt
+    │   │               │   │   ├── home
+    │   │               │   │   │   ├── ambil_antrean
+    │   │               │   │   │   │   ├── berhasil_ambil
+    │   │               │   │   │   │   │   ├── BerhasilAmbilAntreanScreen.kt
+    │   │               │   │   │   │   │   └── BerhasilAmbilViewModel.kt
+    │   │               │   │   │   │   ├── DataKendaraanScreen.kt
+    │   │               │   │   │   │   ├── data_tersimpan
+    │   │               │   │   │   │   │   ├── DataTersimpanScreen.kt
+    │   │               │   │   │   │   │   └── DataTersimpanViewModel.kt
+    │   │               │   │   │   │   ├── konfirmasi_antrean
+    │   │               │   │   │   │   │   └── KonfirmasiAntreanScreen.kt
+    │   │               │   │   │   │   ├── pilih_cabang
+    │   │               │   │   │   │   │   └── PilihCabangScreen.kt
+    │   │               │   │   │   │   ├── pilih_estimasi
+    │   │               │   │   │   │   │   └── PilihEstimasiScreen.kt
+    │   │               │   │   │   │   └── tambah_data
+    │   │               │   │   │   │       ├── SavedAntrianViewModel.kt
+    │   │               │   │   │   │       ├── TambahDataScreen.kt
+    │   │               │   │   │   │       └── TambahDataScreenViewModel.kt
+    │   │               │   │   │   ├── detail_cabang
+    │   │               │   │   │   │   ├── daftar_cabang
+    │   │               │   │   │   │   │   ├── DaftarCabangScreen.kt
+    │   │               │   │   │   │   │   └── DaftarCabangViewModel.kt
+    │   │               │   │   │   │   ├── DetailCabangScreen.kt
+    │   │               │   │   │   │   └── DetailCabangViewModel.kt
+    │   │               │   │   │   ├── history
+    │   │               │   │   │   │   ├── HistoryScreen.kt
+    │   │               │   │   │   │   └── HistoryViewModel.kt
+    │   │               │   │   │   ├── HomeScreen.kt
+    │   │               │   │   │   ├── HomeViewModel.kt
+    │   │               │   │   │   └── reminder
+    │   │               │   │   │       ├── ReminderScreen.kt
+    │   │               │   │   │       └── ReminderViewModel.kt
+    │   │               │   │   ├── MainScreen.kt
+    │   │               │   │   ├── MainViewModel.kt
+    │   │               │   │   ├── notifications
+    │   │               │   │   │   ├── detail_notifikasi
+    │   │               │   │   │   │   ├── DetailNotifikacationViewModel.kt
+    │   │               │   │   │   │   └── DetailNotifikasiScreen.kt
+    │   │               │   │   │   ├── NotificationsScreen.kt
+    │   │               │   │   │   └── NotificationsViewModel.kt
+    │   │               │   │   ├── profile
+    │   │               │   │   │   ├── edit_profile
+    │   │               │   │   │   │   └── EditProfileScreen.kt
+    │   │               │   │   │   ├── ProfileScreen.kt
+    │   │               │   │   │   └── ProfileViewModel.kt
+    │   │               │   │   └── queues
+    │   │               │   │       ├── detail_antrean
+    │   │               │   │       │   └── DetailAntreanScreen.kt
+    │   │               │   │       ├── QueuesScreen.kt
+    │   │               │   │       └── QueusViewModel.kt
+    │   │               │   └── splash
+    │   │               │       ├── SplashAnimationOldDevice.kt
+    │   │               │       └── SplashScreenViewModel.kt
+    │   │               ├── ui
+    │   │               │   └── theme
+    │   │               │       ├── Color.kt
+    │   │               │       ├── Font.kt
+    │   │               │       ├── Theme.kt
+    │   │               │       └── Type.kt
+    │   │               └── utils
+    │   │                   ├── BitmapCropUtils.kt
+    │   │                   ├── CredentialsManager.kt
+    │   │                   ├── FindNearestCabangUtils.kt
+    │   │                   ├── FormatDateUtils.kt
+    │   │                   ├── LocationUtils.kt
+    │   │                   ├── navigation
+    │   │                   │   ├── NavGraph.kt
+    │   │                   │   └── Screen.kt
+    │   │                   ├── NetworkStatus.kt
+    │   │                   ├── NetworkUtils.kt
+    │   │                   └── test
+    │   │                       ├── LoginWithGoogle.kt
+    │   │                       ├── TestApiScreen.kt
+    │   │                       ├── TestUserFactory.kt
+    │   │                       └── TestViewModelApi.kt
+    │   └── res
+    │       ├── animator
+    │       ├── drawable
+    │       ├── font
+    │       ├── layout
+    │       ├── raw
+    │       ├── values
+    │       └── xml
+    └── test
+        └── java
+            └── dev
+                └── inteiintel
+                    └── teduhserviceapp
+                        ├── ExampleUnitTest.kt
+                        ├── model
+                        │   ├── AuthModelTest.kt
+                        │   └── BranchModelTest.kt
+                        ├── repository
+                        │   ├── AmbilAntreanRepositoryTest.kt
+                        │   ├── AntreanActiveRepositoryTest.kt
+                        │   ├── AuthRepositoryTest.kt
+                        │   ├── BranchRepositoryTest.kt
+                        │   ├── DetailBranchRepositoryTest.kt
+                        │   ├── DetailNotificationsRepositoryTest.kt
+                        │   ├── NotificationsRepositoryTest.kt
+                        │   ├── ReminderRepositoryTest.kt
+                        │   └── RingkasanHomeRepositoryTest.kt
+                        └── utils
+                            └── FormatDateUtilsTest.kt
 ```
 
 ### Clean Architecture Layers
