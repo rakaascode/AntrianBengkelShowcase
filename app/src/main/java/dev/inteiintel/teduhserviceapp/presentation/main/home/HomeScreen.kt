@@ -94,7 +94,7 @@ fun HomeScreen(
     // 1️⃣ Load data ringkasan LANGSUNG — tidak tunggu lokasi
     //    Ini memastikan card tetap muncul meski GPS tidak tersedia
     LaunchedEffect(Unit) {
-        Log.d("HOME_DEBUG", "🚀 HomeScreen launched — load data awal")
+        Log.d("HOME_DEBUG", "HomeScreen launched — load data awal")
         profileViewModel.loadProfile()
         daftarCabangViewModel.loadDataCabang()
         ringkasanViewModel.getNearBranchWithoutLocation()  // load tanpa GPS dulu
@@ -108,15 +108,15 @@ fun HomeScreen(
     // 3️⃣ Jika izin sudah granted → refine dengan lokasi GPS untuk akurasi lebih baik
     LaunchedEffect(locationPermissionState.status) {
         if (locationPermissionState.status.isGranted) {
-            Log.d("HOME_DEBUG", "✅ Permission granted — refine dengan GPS")
+            Log.d("HOME_DEBUG", "Permission granted — refine dengan GPS")
             LocationUtils.getUserLocation(
                 context = context,
                 onResult = { lat, lng ->
-                    Log.d("HOME_DEBUG", "📍 LOCATION OK: $lat , $lng")
+                    Log.d("HOME_DEBUG", "LOCATION OK: $lat , $lng")
                     ringkasanViewModel.getNearBranch(userLat = lat, userLng = lng)
                 },
                 onError = {
-                    Log.e("HOME_DEBUG", "❌ GPS gagal — tetap pakai data awal")
+                    Log.e("HOME_DEBUG", "GPS gagal — tetap pakai data awal")
                     // data dari getNearBranchWithoutLocation() sudah ada, tidak perlu action
                 }
             )
