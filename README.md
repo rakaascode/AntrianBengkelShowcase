@@ -247,7 +247,7 @@ app
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/miawwmiaww/AntrianBengkelShowcase.git
+   git clone https://github.com/rakaascode/AntrianBengkelShowcase.git
    cd AntrianBengkelShowcase
    ```
 
