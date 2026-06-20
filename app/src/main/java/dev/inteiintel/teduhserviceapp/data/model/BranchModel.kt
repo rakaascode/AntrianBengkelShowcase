@@ -36,5 +36,5 @@ data class Branch(
 
 data class BranchWithDistance(
     val branch: Branch,
-    val distanceKm: Double
+    val distanceKm: Double?
 )

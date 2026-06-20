@@ -59,6 +59,15 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.navigation.NavHostController
 
 
+/**
+ * Screen kamera untuk memindai STNK menggunakan ML Kit OCR.
+ *
+ * Menampilkan live preview kamera dengan overlay frame STNK.
+ * Saat tombol scan ditekan, gambar di-crop ke area frame sebelum diproses OCR.
+ *
+ * @param onResult Callback yang dipanggil dengan hasil parsing [StnkResult] setelah OCR selesai.
+ * @param viewModel ViewModel yang menangani proses OCR, default menggunakan [ViewModelOCR].
+ */
 @Composable
 fun ScanStnkScreen(
     onResult: (StnkResult) -> Unit,
@@ -131,10 +140,17 @@ fun ScanStnkScreen(
 
                         override fun onImageSaved(output: ImageCapture.OutputFileResults) {
 
-                            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                            val raw = BitmapFactory.decodeFile(file.absolutePath)
+
+                            val cropArea = CropArea(
+                                left   = 0.06f,
+                                top    = 0.22f,
+                                width  = 0.88f,
+                                height = 0.88f * 0.68f
+                            )
+                            val bitmap = cropBitmap(raw, cropArea)
 
                             viewModel.processOCR(bitmap) { result ->
-
                                 onResult(result)
                             }
                         }
@@ -154,12 +170,29 @@ fun ScanStnkScreen(
     }
 }
 
+/**
+ * Model data untuk mendefinisikan posisi dan tinggi setiap baris field pada overlay STNK.
+ *
+ * @property name Nama label field yang ditampilkan di kolom kiri overlay.
+ * @property topPercent Posisi vertikal baris relatif terhadap tinggi frame STNK (0.0–1.0).
+ * @property heightPercent Tinggi baris relatif terhadap tinggi frame STNK (0.0–1.0).
+ */
 data class FieldRect(
     val name: String,
     val topPercent: Float,
     val heightPercent: Float
 )
 
+/**
+ * Composable yang menggambar overlay kamera berbentuk frame STNK.
+ *
+ * Terdiri dari:
+ * - Overlay gelap di luar area STNK
+ * - Frame STNK dengan border putih
+ * - Garis pemisah kolom label dan nilai
+ * - Label field (Nomor Polisi, Nama Pemilik, dst.) di kolom kiri
+ * - Kotak area OCR di kolom kanan untuk setiap field
+ */
 @Composable
 fun CanvasHelperStnk() {
 
@@ -179,14 +212,8 @@ fun CanvasHelperStnk() {
         modifier = Modifier.fillMaxSize()
     ) {
 
-        // =========================
-        // OVERLAY GELAP
-        // =========================
         drawRect(Color.Black.copy(alpha = 0.5f))
 
-        // =========================
-        // FRAME STNK
-        // =========================
         val rectWidth = size.width * 0.88f
         val rectHeight = rectWidth * 0.68f
 
@@ -209,9 +236,6 @@ fun CanvasHelperStnk() {
             style = Stroke(width = 4f)
         )
 
-        // =========================
-        // PEMBATAS COLUMN
-        // =========================
         val dividerX = left + (rectWidth * 0.38f)
 
         drawLine(
@@ -221,26 +245,17 @@ fun CanvasHelperStnk() {
             strokeWidth = 2f
         )
 
-        // =========================
-        // PAINT LABEL TEXT
-        // =========================
         val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = android.graphics.Color.WHITE
             textSize = 26f
             isFakeBoldText = true
         }
 
-        // =========================
-        // DRAW ROWS
-        // =========================
         fields.forEach { field ->
 
             val rowTop = top + (rectHeight * field.topPercent)
             val rowHeight = rectHeight * field.heightPercent
 
-            // =========================
-            // COLUMN 1 - LABEL TEXT
-            // =========================
             val labelX = left + 30f
             val labelY = rowTop + rowHeight * 0.7f
 
@@ -251,9 +266,6 @@ fun CanvasHelperStnk() {
                 labelPaint
             )
 
-            // =========================
-            // COLUMN 2 - VALUE OCR AREA
-            // =========================
             val valueLeft = dividerX + 12f
             val valueWidth = rectWidth * 0.52f
 
@@ -268,6 +280,12 @@ fun CanvasHelperStnk() {
     }
 }
 
+/**
+ * Composable overlay kamera sederhana tanpa field label.
+ *
+ * Menampilkan frame transparan dengan overlay gelap untuk scanning dokumen portrait.
+ * Digunakan sebagai alternatif [CanvasHelperStnk] untuk kasus tanpa label field.
+ */
 @Composable
 fun Scan(){
     Canvas(modifier = Modifier.fillMaxSize()) {
@@ -299,6 +317,14 @@ fun Scan(){
     }
 }
 
+/**
+ * Composable section untuk memilih dan mengunggah foto STNK dari galeri.
+ *
+ * Membuka image picker saat di-tap, memproses gambar melalui OCR,
+ * lalu memanggil [onResult] dengan [StnkResult] yang telah diparsing.
+ *
+ * @param onResult Callback yang dipanggil dengan hasil parsing [StnkResult].
+ */
 @Composable
 fun SectionScan(
     onResult: (StnkResult) -> Unit
@@ -387,8 +413,6 @@ fun SectionScan(
         }
     }
 }
-
-
 
 
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)

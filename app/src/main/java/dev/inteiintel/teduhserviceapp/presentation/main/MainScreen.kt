@@ -58,6 +58,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
+/**
+ * Shell utama aplikasi setelah login berhasil.
+ *
+ * Menampilkan [BottomBar] dan mengatur navigasi internal antar tab:
+ * - [HomeScreen] — beranda dengan ringkasan dan aksi utama.
+ * - [QueuesScreen] — daftar antrian aktif pengguna.
+ * - [NotificationsScreen] — broadcast notifikasi dari bengkel.
+ * - [ProfileScreen] — profil dan pengaturan akun.
+ *
+ * Juga mengawasi refresh token secara reaktif: jika token dihapus (logout),
+ * pengguna otomatis diarahkan kembali ke [Screen.Auth].
+ *
+ * @param viewModel ViewModel autentikasi untuk cek sesi aktif.
+ * @param rootNavController Controller navigasi root (dari [AppNavGraph]) untuk navigasi lintas-alur.
+ *
+ * @see dev.inteiintel.teduhserviceapp.utils.navigation.AppNavGraph
+ * @see dev.inteiintel.teduhserviceapp.presentation.auth.AuthViewModel
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(
@@ -127,6 +145,16 @@ fun LogoutButtonTest(scope: CoroutineScope, viewModel: AuthViewModel, context: C
 
 
 
+/**
+ * Bottom navigation bar alternatif berbasis icon kustom dari drawable resource.
+ *
+ * Setiap item menggunakan ikon dari `res/drawable`. Tab aktif ditandai dengan
+ * background [DarkOrange] dan ikon putih.
+ *
+ * @param navController Controller navigasi untuk bottom tab.
+ *
+ * @see BottomBar
+ */
 @Composable
 fun CustomBottomBar(navController: NavController) {
 
@@ -189,6 +217,15 @@ fun CustomBottomBar(navController: NavController) {
 }
 
 
+/**
+ * Bottom navigation bar utama aplikasi berbasis Material3 [NavigationBar].
+ *
+ * Menampilkan 4 tab (Beranda, Antrian, Notifikasi, Profil) dengan indikator warna [PrimBlue]
+ * untuk tab yang aktif. Navigasi menggunakan `launchSingleTop` dan `restoreState` untuk
+ * menjaga state antar tab.
+ *
+ * @param navController Controller navigasi internal bottom tab.
+ */
 @Composable
 fun BottomBar(navController: NavHostController) {
 

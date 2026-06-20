@@ -18,14 +18,16 @@ class TambahDataScreenViewModel @Inject constructor(
     private val ambilAntreanRepository: AmbilAntreanRepository
 ) : ViewModel() {
 
-    private val _antreanState = MutableStateFlow<CreateAntrianResponse?>(null)
-    val antreanState = _antreanState.asStateFlow()
+
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage = _errorMessage.asStateFlow()
+
+    private val _antreanState = MutableStateFlow<CreateAntrianResponse?>(null)
+    val antreanState = _antreanState.asStateFlow()
 
     fun createAntrean(antreanRequest: CreateAntrianRequest) {
 
@@ -37,7 +39,8 @@ class TambahDataScreenViewModel @Inject constructor(
 
             try {
 
-                val result = ambilAntreanRepository.ambilAntreanUsers(antreanRequest)
+                val result = ambilAntreanRepository
+                    .ambilAntreanUsers(antreanRequest)
 
                 result.onSuccess { response ->
                     _antreanState.value = response
@@ -45,12 +48,14 @@ class TambahDataScreenViewModel @Inject constructor(
                 }
 
                 result.onFailure { error ->
-                    _errorMessage.value = error.message ?: "Terjadi kesalahan"
+                    _errorMessage.value = error.message
+                        ?: "Terjadi kesalahan"
                     Log.e("ERROR", error.message.toString())
                 }
 
             } catch (e: Exception) {
-                _errorMessage.value = e.message ?: "Unknown error"
+                _errorMessage.value = e.message
+                    ?: "Unknown error"
                 Log.e("EXCEPTION", e.message.toString())
 
             } finally {

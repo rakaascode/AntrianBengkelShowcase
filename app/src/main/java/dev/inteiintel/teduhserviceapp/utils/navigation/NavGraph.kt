@@ -33,6 +33,7 @@ import dev.inteiintel.teduhserviceapp.presentation.main.home.ambil_antrean.data_
 import dev.inteiintel.teduhserviceapp.presentation.main.home.ambil_antrean.data_tersimpan.PilihDataKendaraanScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.home.ambil_antrean.konfirmasi_antrean.KonfirmasiAntreanScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.home.ambil_antrean.pilih_cabang.PilihCabangScreen
+import dev.inteiintel.teduhserviceapp.presentation.main.home.ambil_antrean.pilih_estimasi.PilihEstimasiScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.home.ambil_antrean.tambah_data.SavedAntrianViewModel
 import dev.inteiintel.teduhserviceapp.presentation.main.home.ambil_antrean.tambah_data.TambahDataScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.home.ambil_antrean.tambah_data.TambahDataScreenViewModel
@@ -46,9 +47,31 @@ import dev.inteiintel.teduhserviceapp.presentation.main.profile.edit_profile.Edi
 import dev.inteiintel.teduhserviceapp.presentation.main.queues.detail_antrean.DetailAntreanScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.queues.getDateOnly
 
+/**
+ * Graf navigasi utama aplikasi Teduh Service.
+ *
+ * Mengecek status login via [TokenManager] saat pertama kali di-compose, lalu menentukan
+ * `startDestination` apakah ke [Screen.Auth] atau [Screen.Main].
+ *
+ * Semua rute aplikasi (termasuk alur ambil antrian dan detail layar) didaftarkan di sini.
+ * Data antar layar dikirim melalui `savedStateHandle` untuk menghindari serialisasi Parcelable
+ * yang tidak perlu di setiap transition.
+ *
+ * **Alur Ambil Antrian:**
+ * ```
+ * TambahDataSTNK ──scan──> ScanStnk
+ *                              │ (kembali dengan stnk_result)
+ * TambahDataSTNK ──lanjut──> PilihCabang ──> KonfirmasiAntrean ──> BerhasilAmbilAntrean
+ *
+ * DataTersimpan  ──pilih──> PilihEstimasi ──> PilihCabang ──> KonfirmasiAntrean
+ * ```
+ *
+ * @see dev.inteiintel.teduhserviceapp.utils.navigation.Screen
+ * @see dev.inteiintel.teduhserviceapp.data.local.TokenManager
+ */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AppNavGraph(){
+fun AppNavGraph() {
 
     var startDestination by remember { mutableStateOf<String?>(null) }
     val context= LocalContext.current
@@ -116,6 +139,7 @@ fun AppNavGraph(){
                 ScanStnkScreen(
                     onResult = { result ->
 
+                        // Set ke currentBackStackEntry (TambahDataSTNK) bukan previousBackStackEntry
                         navController.previousBackStackEntry
                             ?.savedStateHandle
                             ?.set("stnk_result", result)
@@ -168,7 +192,6 @@ fun AppNavGraph(){
                 val viewModel: DataTersimpanViewModel = hiltViewModel()
                 val kendaraanList = viewModel.list.collectAsState().value
 
-
                 PilihDataKendaraanScreen(
                     kendaraanList = kendaraanList,
                     onBackClick = { navController.popBackStack() },
@@ -176,20 +199,54 @@ fun AppNavGraph(){
 
                         val request = entity.toRequest()
 
+                        // Simpan request sementara, arahkan ke PilihEstimasi dulu
                         navController.currentBackStackEntry
                             ?.savedStateHandle
                             ?.set("form_data", request)
 
-                        navController.navigate(Screen.PilihCabang.route)
+                        navController.navigate(Screen.PilihEstimasi.route)
                     }
                 )
+            }
+
+            composable(Screen.PilihEstimasi.route) {
+
+                val formData =
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.get<CreateAntrianRequest>("form_data")
+
+                if (formData != null) {
+                    PilihEstimasiScreen(
+                        request = formData,
+                        onBackClick = {
+                            navController.popBackStack()
+                        },
+                        onLanjutClick = { requestWithEstimasi ->
+
+                            navController.currentBackStackEntry
+                                ?.savedStateHandle
+                                ?.set("form_data", requestWithEstimasi)
+
+                            navController.navigate(Screen.PilihCabang.route)
+                        }
+                    )
+                }
             }
 
             composable (Screen.TambahDataSTNK.route){
 
                 val savedAntrianViewModel: SavedAntrianViewModel = hiltViewModel()
 
+                // Baca hasil scan OCR dari savedStateHandle (diset oleh route ScanStnk)
+                val currentEntry = navController.currentBackStackEntry
+                val stnkResult = currentEntry
+                    ?.savedStateHandle
+                    ?.get<dev.inteiintel.teduhserviceapp.data.model.ui.StnkResult>("stnk_result")
+
                 TambahDataScreen(
+                    initialStnkResult = stnkResult,
+
                     onCancelClick = {
                         navController.popBackStack()
                     },

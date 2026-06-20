@@ -7,9 +7,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class HorizontalPagerViewModel: ViewModel(){
+/**
+ * ViewModel untuk layar pager onboarding (komponen percobaan/development).
+ *
+ * Memuat data onboarding tiga halaman dan mengeksposnya sebagai [StateFlow].
+ * Digunakan oleh [HorizontalPager] composable di `presentation/components`.
+ *
+ * @see dev.inteiintel.teduhserviceapp.presentation.components.HorizontalPager
+ * @see dev.inteiintel.teduhserviceapp.data.model.OnBoardingModel
+ */
+class HorizontalPagerViewModel : ViewModel() {
+
+    /** @suppress Dibiarkan internal karena ini adalah komponen percobaan. */
     val _getDataOnBoardingModel = MutableStateFlow<List<OnBoardingModel>>(emptyList())
-    val getDataOnBoardingModel : StateFlow<List<OnBoardingModel>> =_getDataOnBoardingModel.asStateFlow()
+    val getDataOnBoardingModel: StateFlow<List<OnBoardingModel>> = _getDataOnBoardingModel.asStateFlow()
 
 
     init {

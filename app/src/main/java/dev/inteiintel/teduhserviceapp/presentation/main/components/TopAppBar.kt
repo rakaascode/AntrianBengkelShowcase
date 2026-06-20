@@ -22,11 +22,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.inteiintel.teduhserviceapp.ui.theme.DimGray
 
+/**
+ * Top app bar kustom yang konsisten digunakan di seluruh layar aplikasi.
+ *
+ * Menampilkan judul di tengah dengan opsional satu ikon aksi di sisi kiri.
+ * Jika [icon] dan [onIconClick] tidak diberikan, posisi kiri diisi dengan spacer
+ * agar judul tetap rata tengah.
+ *
+ * Digunakan di hampir semua layar detail sebagai pengganti [androidx.compose.material3.TopAppBar]
+ * standar karena mendukung layout yang lebih terkontrol.
+ *
+ * @param title Teks judul yang ditampilkan di tengah bar.
+ * @param icon Vektor ikon opsional (biasanya ikon navigasi kembali).
+ * @param onIconClick Callback saat ikon ditekan. Wajib diisi jika [icon] tidak null.
+ *
+ * @see dev.inteiintel.teduhserviceapp.ui.theme.DimGray
+ */
 @Composable
 fun TopAppBarCostum(
     title: String,
-    icon: ImageVector? = null,          // ⭐ opsional
-    onIconClick: (() -> Unit)? = null   // ⭐ opsional
+    icon: ImageVector? = null,
+    onIconClick: (() -> Unit)? = null
 ) {
     Column(
         Modifier

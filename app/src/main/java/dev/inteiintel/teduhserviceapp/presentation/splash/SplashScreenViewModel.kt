@@ -10,11 +10,26 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SplashScreenViewModel: ViewModel() {
+/**
+ * ViewModel untuk mengelola visibilitas splash screen.
+ *
+ * Mengecek status login melalui [TokenManager] dan menyembunyikan splash screen
+ * setelah delay singkat 30ms. Digunakan oleh [MainActivity] melalui
+ * `SplashScreen.setKeepOnScreenCondition`.
+ *
+ * @see dev.inteiintel.teduhserviceapp.MainActivity
+ * @see dev.inteiintel.teduhserviceapp.data.local.TokenManager
+ */
+class SplashScreenViewModel : ViewModel() {
 
     private val _isSplashScreenVisible = MutableStateFlow(true)
     val isSplashScreenVisible: StateFlow<Boolean> = _isSplashScreenVisible
 
+    /**
+     * Memeriksa status login dan menyembunyikan splash screen setelah selesai.
+     *
+     * @param context Konteks untuk mengakses DataStore melalui [TokenManager].
+     */
     fun checkLogin(context: Context) {
         viewModelScope.launch {
             TokenManager(context).isLoggedIn()

@@ -22,10 +22,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,36 +42,68 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import dev.inteiintel.teduhserviceapp.R
 import dev.inteiintel.teduhserviceapp.data.model.NotificationData
 import dev.inteiintel.teduhserviceapp.ui.theme.BgNotif
 import dev.inteiintel.teduhserviceapp.ui.theme.DimGray
+import dev.inteiintel.teduhserviceapp.ui.theme.PrimBlue
 import dev.inteiintel.teduhserviceapp.ui.theme.SnowWhite
 import dev.inteiintel.teduhserviceapp.utils.navigation.Screen
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NotificationsScreen(
     viewModel: NotificationsViewModel = hiltViewModel(),
     navController: NavController,
 ) {
-
     val notifications by viewModel.getNotificationData.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val unreadCount = notifications.count { !it.isRead }
 
-    Column( modifier = Modifier
-        .background(Color.White)
-        .fillMaxSize()) {
+    val lifecycleOwner = LocalLifecycleOwner.current
 
+    // Start polling saat screen ON_RESUME, stop saat ON_PAUSE
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    viewModel.refresh()      // langsung refresh saat kembali ke screen
+                    viewModel.startPolling() // mulai polling
+                }
+                Lifecycle.Event.ON_PAUSE -> {
+                    viewModel.stopPolling()  // hemat baterai saat screen tidak aktif
+                }
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val pullState = rememberPullToRefreshState()
+
+    Column(
+        modifier = Modifier
+            .background(Color.White)
+            .fillMaxSize()
+    ) {
+
+        // ─── Top Bar ──────────────────────────────────────────────────────────
         Box(
             modifier = Modifier
                 .background(Color.White)
                 .fillMaxWidth()
         ) {
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -75,56 +111,74 @@ fun NotificationsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-
                 Text(
                     text = "Notifikasi",
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
+
+                // Badge unread count
+                if (unreadCount > 0) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(22.dp)
+                            .background(PrimBlue, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (unreadCount > 99) "99+" else unreadCount.toString(),
+                            fontSize = 10.sp,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
 
-        HorizontalDivider(
-            thickness = 1.dp,
-            color = DimGray
-        )
+        HorizontalDivider(thickness = 1.dp, color = DimGray)
 
-        if (notifications.isEmpty()) {
+        // ─── Content dengan Pull-to-Refresh ───────────────────────────────────
+        PullToRefreshBox(
+            isRefreshing = isLoading,
+            onRefresh = { viewModel.refresh() },
+            state = pullState,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (notifications.isEmpty() && !isLoading) {
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 80.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 80.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.img_not_found),
+                        contentDescription = "not found",
+                        contentScale = ContentScale.FillWidth,
+                        modifier = Modifier.size(200.dp)
+                    )
 
-                Image(
-                    painter = painterResource(R.drawable.img_not_found),
-                    contentDescription = "not found",
-                    contentScale = ContentScale.FillWidth,
-                    modifier = Modifier.size(200.dp)
-                )
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Saat ini kamu belum memiliki notifikasi",
+                        fontSize = 12.sp,
+                        color = Color(0xFF7B7E8F),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
-                Text(
-                    text = "Saat ini kamu belum memiliki antrean \n selesai",
-                    fontSize = 12.sp,
-                    color = Color(0xFF7B7E8F),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+            } else {
+                NotificationScreen(
+                    notifications = notifications,
+                    navController = navController,
+                    onReadNotification = { id -> viewModel.markAsRead(id) }
                 )
             }
-
-        } else {
-
-            NotificationScreen(
-                notifications = notifications,
-                navController = navController,
-                onReadNotification = { id ->
-                    viewModel.markAsRead(id)
-                }
-            )
         }
     }
 }

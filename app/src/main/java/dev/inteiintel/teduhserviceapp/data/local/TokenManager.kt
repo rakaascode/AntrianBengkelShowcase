@@ -11,6 +11,22 @@ private const val DATASTORE_NAME = "token_store"
 
 val Context.tokenDataStore by preferencesDataStore(name = DATASTORE_NAME)
 
+/**
+ * Manajer token autentikasi berbasis Jetpack DataStore (Preferences).
+ *
+ * Menyimpan dan mengelola access token serta refresh token JWT secara persisten
+ * di penyimpanan terenkripsi DataStore. Digunakan oleh:
+ * - [AuthInterceptor] untuk mengambil access token pada setiap request API.
+ * - [AuthViewModel] untuk menyimpan token setelah login Google berhasil.
+ * - [AppNavGraph] dan [MainScreen] untuk mengecek status sesi (login/logout).
+ *
+ * DataStore didefinisikan melalui delegasi ekstensi [Context.tokenDataStore].
+ *
+ * @param context Konteks aplikasi untuk mengakses DataStore.
+ *
+ * @see dev.inteiintel.teduhserviceapp.data.remote.AuthInterceptor
+ * @see dev.inteiintel.teduhserviceapp.presentation.auth.AuthViewModel
+ */
 class TokenManager(private val context: Context) {
 
     private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")

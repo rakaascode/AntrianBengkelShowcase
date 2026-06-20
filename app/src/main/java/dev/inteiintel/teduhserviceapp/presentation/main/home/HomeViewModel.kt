@@ -26,28 +26,11 @@ class RingkasanHomeViewModel @Inject constructor(
 
     private val _error = MutableStateFlow<String?>(null)
 
-    fun getRingkasanHome(userLat: Double, userLng: Double) {
-
+    fun getNearBranch(userLat: Double, userLng: Double) {
         viewModelScope.launch {
-
             _loading.value = true
-
-            Log.d("RINGKASAN_VM", "🚀 REQUEST START")
-            Log.d("RINGKASAN_VM", "📍 User Location: lat=$userLat lng=$userLng")
-
             repository.getRingkasanHome()
                 .onSuccess { response ->
-
-                    Log.d("RINGKASAN_VM", "✅ API SUCCESS")
-                    Log.d("RINGKASAN_VM", "📦 Total cabang: ${response.data.size}")
-
-                    response.data.forEach {
-                        Log.d(
-                            "RINGKASAN_VM",
-                            "🏢 Cabang: ${it.namaCabang} | lat=${it.latitude} lng=${it.longitude}"
-                        )
-                    }
-
                     val nearest = response.data.minByOrNull {
                         val distance = FindUtils.calculateDistanceKm(
                             userLat,
@@ -55,31 +38,32 @@ class RingkasanHomeViewModel @Inject constructor(
                             it.latitude,
                             it.longitude
                         )
-
-                        Log.d(
-                            "RINGKASAN_VM",
-                            "📏 ${it.namaCabang} distance = $distance km"
-                        )
-
                         distance
                     }
-
-                    Log.d(
-                        "RINGKASAN_VM",
-                        "🎯 NEAREST CABANG = ${nearest?.namaCabang}"
-                    )
-
                     _nearestCabang.value = nearest
                 }
                 .onFailure { error ->
-
-                    Log.e("RINGKASAN_VM", "❌ ERROR: ${error.message}")
                     _error.value = error.message
                 }
-
             _loading.value = false
+        }
+    }
 
-            Log.d("RINGKASAN_VM", "🏁 REQUEST END")
+    /** Fallback: jika GPS tidak tersedia, pilih cabang yang punya antrian aktif */
+    fun getNearBranchWithoutLocation() {
+        viewModelScope.launch {
+            _loading.value = true
+            repository.getRingkasanHome()
+                .onSuccess { response ->
+                    // Pilih cabang dengan antrian aktif, atau cabang pertama sebagai default
+                    val active = response.data.firstOrNull { it.sisaAntrian > 0 }
+                        ?: response.data.firstOrNull()
+                    _nearestCabang.value = active
+                }
+                .onFailure { error ->
+                    _error.value = error.message
+                }
+            _loading.value = false
         }
     }
 }

@@ -17,8 +17,8 @@ android {
         minSdk = 24
         //noinspection OldTargetApi
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.2"
+        versionCode = 4
+        versionName = "1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -107,6 +107,20 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     testImplementation(libs.junit)
+
+    // MockK - mocking framework untuk Kotlin
+    testImplementation("io.mockk:mockk:1.13.10")
+    testImplementation("io.mockk:mockk-android:1.13.10")
+
+    // Coroutines Test - untuk runTest { } di suspend function
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+
+    // Retrofit Mock - untuk Response.error() dan Response.success()
+    testImplementation("com.squareup.retrofit2:retrofit-mock:2.9.0")
+
+    // OkHttp - untuk toResponseBody() helper di test
+    testImplementation("com.squareup.okhttp3:okhttp:4.12.0")
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

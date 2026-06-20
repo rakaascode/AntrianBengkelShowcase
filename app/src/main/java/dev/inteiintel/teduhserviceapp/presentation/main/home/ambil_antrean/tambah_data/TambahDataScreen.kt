@@ -61,14 +61,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.inteiintel.teduhserviceapp.data.model.AntrianFormData
 import dev.inteiintel.teduhserviceapp.data.model.CreateAntrianRequest
+import dev.inteiintel.teduhserviceapp.data.model.ui.StnkResult
 import dev.inteiintel.teduhserviceapp.ui.theme.DimGray
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.runtime.LaunchedEffect
 
 
 @Composable
 fun TambahDataScreen(
+    initialStnkResult: StnkResult? = null,
     onClickScanOCR: ()-> Unit = {},
     onCancelClick: () -> Unit = {},
     onNextScreenClick: (CreateAntrianRequest)-> Unit = {},
@@ -76,6 +79,7 @@ fun TambahDataScreen(
 ) {
 
     var namaLengkap by remember { mutableStateOf("") }
+    var merkMotor by remember { mutableStateOf("") }
     var tipeMotor by remember { mutableStateOf("") }
     var noPolisi by remember { mutableStateOf("") }
     var tahunPembuatan by remember { mutableStateOf("") }
@@ -84,12 +88,27 @@ fun TambahDataScreen(
 
     var saveToLocal by remember { mutableStateOf(false) }
 
-
     var tanggalKedatangan by remember { mutableStateOf("") }
     var jamKedatangan by remember { mutableStateOf("") }
 
+    // Auto-fill field dari hasil scan OCR
+    LaunchedEffect(initialStnkResult) {
+        initialStnkResult?.let { result ->
+            result.nama?.let        { namaLengkap    = it }
+            result.tipe?.let        {
+                merkMotor = "Yamaha"   // Selalu Yamaha
+                tipeMotor = it.replace(Regex("(?i)^yamaha\\s*"), "").trim()
+            }
+            result.no_polisi?.let   { noPolisi       = it }
+            result.tahun?.let       { tahunPembuatan = it }
+            result.no_rangka?.let   { noRangka       = it }
+            result.no_mesin?.let    { noMesin        = it }
+        }
+    }
+
     val isFormValid =
         namaLengkap.isNotBlank() &&
+                merkMotor.isNotBlank() &&
                 tipeMotor.isNotBlank() &&
                 noPolisi.isNotBlank() &&
                 noRangka.isNotBlank() &&
@@ -139,9 +158,17 @@ fun TambahDataScreen(
 
             item {
                 Row {
-                    FormInput(stateValue = tipeMotor, onValueChange = {tipeMotor = it},"Tipe Motor", "Yamaha Fazzio",Modifier.weight(1f))
+                    FormInput(stateValue = merkMotor, onValueChange = {merkMotor = it},"Merk Motor", "Yamaha", Modifier.weight(1f))
                     Spacer(modifier = Modifier.width(8.dp))
-                    FormInput(stateValue = noPolisi, onValueChange = {noPolisi = it},"No Polisi", "BE...", Modifier.weight(1f))
+                    FormInput(stateValue = tipeMotor, onValueChange = {tipeMotor = it},"Tipe Motor", "Mio M3", Modifier.weight(1f))
+                }
+            }
+
+            item {
+                Row {
+                    FormInput(stateValue = noPolisi, onValueChange = {noPolisi = it},"No Polisi", "BE 1234 AB", Modifier.weight(1f))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    FormInput(stateValue = tahunPembuatan, onValueChange = {tahunPembuatan = it},"Tahun", "2020", Modifier.weight(1f))
                 }
             }
 
@@ -152,8 +179,6 @@ fun TambahDataScreen(
                     FormInput(stateValue = noMesin, onValueChange = {noMesin = it},"No. Mesin", "JM1...", Modifier.weight(1f))
                 }
             }
-
-            item { FormInput(stateValue = tahunPembuatan, onValueChange = {tahunPembuatan = it},"Tahun Pembuatan", "Pilih Tahun") }
 
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
@@ -188,8 +213,8 @@ fun TambahDataScreen(
                     val dataReq = CreateAntrianRequest(
                         cabang_id = 0,
                         nama_pemilik = namaLengkap,
-                        no_hp = noPolisi,
-                        merk_motor = "Yamaha",
+                        no_hp = noPolisi,      // API masih pakai no_hp untuk nomor polisi
+                        merk_motor = merkMotor.ifBlank { "Yamaha" },
                         tipe_motor = tipeMotor,
                         no_rangka = noRangka,
                         no_mesin = noMesin,

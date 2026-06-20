@@ -1,0 +1,41 @@
+@startuml
+
+package "presentation" {
+
+  class AuthViewModel
+  class HomeViewModel
+  class ProfileViewModel
+}
+
+package "repository" {
+
+  class AuthRepository
+  class UserRepository
+  class RingkasanHomeRepository
+}
+
+package "remote" {
+
+  interface ApiServices
+  class ApiClient
+}
+
+package "local.room" {
+
+  class AppDatabase
+  class AntrianDao
+  class SavedAntrianEntity
+}
+
+AuthViewModel --> AuthRepository
+ProfileViewModel --> UserRepository
+HomeViewModel --> RingkasanHomeRepository
+
+AuthRepository --> ApiServices
+UserRepository --> ApiServices
+RingkasanHomeRepository --> ApiServices
+
+AppDatabase --> AntrianDao
+AntrianDao --> SavedAntrianEntity
+
+@enduml

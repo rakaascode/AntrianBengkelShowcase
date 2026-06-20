@@ -3,6 +3,18 @@ package dev.inteiintel.teduhserviceapp.data.local.room
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+/**
+ * Entity Room yang merepresentasikan satu data antrian tersimpan secara lokal.
+ *
+ * Disimpan ke tabel `saved_antrian` oleh pengguna melalui layar [TambahDataScreen]
+ * sehingga dapat dipilih kembali di layar [DataTersimpanScreen] tanpa harus mengisi
+ * ulang formulir.
+ *
+ * Dapat dikonversi ke [CreateAntrianRequest] menggunakan ekstensi [toRequest].
+ *
+ * @see dev.inteiintel.teduhserviceapp.data.local.room.AntrianDao
+ * @see dev.inteiintel.teduhserviceapp.data.mapper.DataMapperSaved
+ */
 @Entity(tableName = "saved_antrian")
 data class SavedAntrianEntity(
 

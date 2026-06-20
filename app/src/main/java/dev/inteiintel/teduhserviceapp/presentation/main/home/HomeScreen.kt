@@ -47,6 +47,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -81,46 +82,44 @@ fun HomeScreen(
     val nearestCabang = ringkasanViewModel.nearestCabang.collectAsState().value
     val loading = ringkasanViewModel.loading.collectAsState().value
 
+    // Tampilkan card HANYA jika ada antrian aktif di cabang terdekat.
+    // Jika sisaAntrian == 0 dan nomorDipanggil == null, card disembunyikan.
     val showQueueCard = nearestCabang != null &&
-            nearestCabang.nomorDipanggil != null &&
-            nearestCabang.nomorDipanggil != 0
+            (nearestCabang.nomorDipanggil != null || nearestCabang.sisaAntrian > 0)
 
     val locationPermissionState = rememberPermissionState(
         permission = Manifest.permission.ACCESS_FINE_LOCATION
     )
 
+    // 1️⃣ Load data ringkasan LANGSUNG — tidak tunggu lokasi
+    //    Ini memastikan card tetap muncul meski GPS tidak tersedia
+    LaunchedEffect(Unit) {
+        Log.d("HOME_DEBUG", "🚀 HomeScreen launched — load data awal")
+        profileViewModel.loadProfile()
+        daftarCabangViewModel.loadDataCabang()
+        ringkasanViewModel.getNearBranchWithoutLocation()  // load tanpa GPS dulu
+    }
+
+    // 2️⃣ Minta izin lokasi terpisah
     LaunchedEffect(Unit) {
         locationPermissionState.launchPermissionRequest()
     }
 
-    LaunchedEffect(Unit) {
-
-        Log.d("HOME_DEBUG", "🚀 HomeScreen launched")
-
-        profileViewModel.loadProfile()
-        daftarCabangViewModel.loadDataCabang()
-
+    // 3️⃣ Jika izin sudah granted → refine dengan lokasi GPS untuk akurasi lebih baik
+    LaunchedEffect(locationPermissionState.status) {
         if (locationPermissionState.status.isGranted) {
-
+            Log.d("HOME_DEBUG", "✅ Permission granted — refine dengan GPS")
             LocationUtils.getUserLocation(
                 context = context,
                 onResult = { lat, lng ->
-
                     Log.d("HOME_DEBUG", "📍 LOCATION OK: $lat , $lng")
-
-                    ringkasanViewModel.getRingkasanHome(
-                        userLat = lat,
-                        userLng = lng
-                    )
+                    ringkasanViewModel.getNearBranch(userLat = lat, userLng = lng)
                 },
                 onError = {
-                    Log.e("HOME_DEBUG", "❌ LOCATION FAILED")
+                    Log.e("HOME_DEBUG", "❌ GPS gagal — tetap pakai data awal")
+                    // data dari getNearBranchWithoutLocation() sudah ada, tidak perlu action
                 }
             )
-
-        } else {
-
-            Log.e("HOME_DEBUG", "❌ Permission not granted")
         }
     }
 
@@ -216,6 +215,19 @@ fun CurrentQueueCard(
     cabang: RingkasanCabangItem
 ) {
 
+    // Tentukan teks nomor antrian yang dipanggil
+    val nomorText = when {
+        cabang.nomorDipanggil != null && cabang.nomorDipanggil != 0 -> "A${cabang.nomorDipanggil}"
+        cabang.sisaAntrian > 0 -> "-"
+        else -> "-"
+    }
+
+    // Progress bar dinamis — estimasi maks 30 antrian per hari
+    val progress = when {
+        cabang.sisaAntrian <= 0 -> 1f
+        else -> (1f - (cabang.sisaAntrian.toFloat() / 30f)).coerceIn(0f, 1f)
+    }
+
     Card(
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth(),
@@ -234,14 +246,17 @@ fun CurrentQueueCard(
                 Text(
                     text = "ANTRIAN HARI INI",
                     color = Color.Black,
-                    fontSize = 14.sp
+                    fontSize = 12.sp
                 )
 
                 Text(
-                    text = cabang.namaCabang ?: "-",
-                    fontSize = 14.sp,
+                    text = cabang.namaCabang,
+                    fontSize = 12.sp,
                     color = Color.White,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
+                        .width(80.dp)
                         .background(
                             Color(0xFFFF7A00),
                             RoundedCornerShape(20)
@@ -256,7 +271,7 @@ fun CurrentQueueCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "A${cabang.nomorDipanggil}",
+                text = nomorText,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -264,7 +279,7 @@ fun CurrentQueueCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             LinearProgressIndicator(
-                progress = { 0.7f },
+                progress = { progress },
                 modifier = Modifier.fillMaxWidth(),
                 color = Color(0xFF1C1F4A)
             )
@@ -277,13 +292,13 @@ fun CurrentQueueCard(
             ) {
 
                 Text(
-                    text = "Estimasi: ${cabang.estimasiJam ?: "-"}",
+                    text = "Estimasi: ${cabang.estimasiJam.ifBlank { "-" }}",
                     color = Color.Gray,
                     fontSize = 14.sp
                 )
 
                 Text(
-                    text = "${cabang.sisaAntrian ?: 0} Antrian lagi",
+                    text = "${cabang.sisaAntrian} Antrian lagi",
                     fontSize = 14.sp
                 )
             }

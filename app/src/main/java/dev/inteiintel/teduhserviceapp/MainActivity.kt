@@ -18,6 +18,17 @@ import dev.inteiintel.teduhserviceapp.utils.navigation.AppNavGraph
 import dev.inteiintel.teduhserviceapp.presentation.splash.SplashScreenViewModel
 import dev.inteiintel.teduhserviceapp.ui.theme.TeduhServiceAppTheme
 
+/**
+ * Activity utama aplikasi, menjadi satu-satunya Activity dalam arsitektur single-Activity.
+ *
+ * Bertanggung jawab untuk:
+ * - Menampilkan splash screen (Android 12+) selama status login dicek.
+ * - Menyetel konten Compose melalui [AppNavGraph].
+ * - Menerapkan [TeduhServiceAppTheme] secara global.
+ *
+ * @see dev.inteiintel.teduhserviceapp.utils.navigation.AppNavGraph
+ * @see dev.inteiintel.teduhserviceapp.presentation.splash.SplashScreenViewModel
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val splashScreenViewModel: SplashScreenViewModel by lazy {

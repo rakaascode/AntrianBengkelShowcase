@@ -20,6 +20,21 @@ import dev.inteiintel.teduhserviceapp.data.repository.NotificationsRepository
 import dev.inteiintel.teduhserviceapp.data.repository.RingkasanHomeRepository
 import javax.inject.Singleton
 
+/**
+ * Modul Hilt yang menyediakan seluruh dependency singleton aplikasi Teduh Service.
+ *
+ * Semua binding di sini di-install ke [SingletonComponent] sehingga instance yang sama
+ * digunakan selama siklus hidup proses aplikasi.
+ *
+ * **Dependency yang disediakan:**
+ * - [ApiServices] — interface Retrofit untuk komunikasi REST.
+ * - Semua repository (`Auth`, `User`, `Branch`, `Notifications`, dll.).
+ * - [AppDatabase] — database Room lokal.
+ * - [AntrianDao] — DAO untuk tabel antrian tersimpan.
+ *
+ * @see dev.inteiintel.teduhserviceapp.data.remote.ApiClient
+ * @see dev.inteiintel.teduhserviceapp.MyApp
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {

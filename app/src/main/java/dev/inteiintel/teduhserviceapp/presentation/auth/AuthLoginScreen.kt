@@ -57,8 +57,20 @@ import dev.inteiintel.teduhserviceapp.ui.theme.DimGray
 import dev.inteiintel.teduhserviceapp.ui.theme.MidnightBlue
 import kotlinx.coroutines.delay
 
+/**
+ * Layar autentikasi aplikasi yang menggabungkan onboarding dan tombol login Google.
+ *
+ * Menampilkan slider 3 halaman onboarding ([HorizontalPager]) yang bergulir otomatis tiap 5 detik.
+ * Jika pengguna sudah login (refresh token tersedia), langsung diarahkan ke [Screen.Main].
+ *
+ * @param viewModel ViewModel autentikasi, diinjeksi oleh Hilt.
+ * @param navController Controller navigasi untuk berpindah ke [Screen.Main] setelah login.
+ *
+ * @see dev.inteiintel.teduhserviceapp.presentation.auth.AuthViewModel
+ * @see dev.inteiintel.teduhserviceapp.utils.navigation.Screen
+ */
 @Composable
-fun AuthLoginScreen(viewModel: AuthViewModel= hiltViewModel (), navController: NavController){
+fun AuthLoginScreen(viewModel: AuthViewModel = hiltViewModel(), navController: NavController) {
     val context = LocalContext.current
     val loadingState = viewModel.loading.collectAsState()
 
@@ -161,6 +173,14 @@ fun AuthLoginScreen(viewModel: AuthViewModel= hiltViewModel (), navController: N
 }
 
 
+/**
+ * Konten satu halaman onboarding: gambar, judul dua baris, dan subjudul.
+ *
+ * @param currentPageIndex Indeks halaman saat ini (0–2).
+ * @param contentOnBoardingModel Daftar model konten onboarding dari [AuthViewModel].
+ *
+ * @see dev.inteiintel.teduhserviceapp.data.model.OnBoardingModel
+ */
 @Composable
 fun OnBoardingContent(currentPageIndex: Int, contentOnBoardingModel: List<OnBoardingModel>)
 {
@@ -200,6 +220,16 @@ fun OnBoardingContent(currentPageIndex: Int, contentOnBoardingModel: List<OnBoar
 }
 
 
+/**
+ * Indikator titik (dot) animasi untuk menunjukkan halaman aktif pada pager onboarding.
+ *
+ * Titik yang aktif melebar secara animasi dan berubah warna ke [MidnightBlue],
+ * sementara titik inaktif berwarna abu-abu.
+ *
+ * @param pageCount Total jumlah halaman pada pager.
+ * @param currentPageIndex Indeks halaman yang sedang aktif.
+ * @param modifier Modifier Compose opsional.
+ */
 @Composable
 fun PagerIndicator(
     pageCount: Int,

@@ -1,0 +1,87 @@
+@startuml
+top to bottom direction
+
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+package "Presentation Layer" {
+
+  class Screen
+
+  package "ViewModel" {
+    class AuthViewModel
+    class HomeViewModel
+    class ProfileViewModel
+    class NotificationsViewModel
+    class MainViewModel
+  }
+}
+
+package "Domain Layer" {
+  class UseCase
+}
+
+package "Data Layer" {
+
+  package "Repository" {
+    class AuthRepository
+    class UserRepository
+    class BranchRepository
+    class NotificationsRepository
+    class SavedAntrianRepository
+  }
+  package "Remote" {
+    class ApiClient
+    class ApiServices
+    class AuthInterceptor
+  }
+
+  package "Local (Room)" {
+    class AppDatabase
+    class AntrianDao
+    class SavedAntrianEntity
+  }
+
+  package "Mapper" {
+    class DataMapperSaved
+  }
+
+  class TokenManager
+}
+
+package "DI" {
+  class AppModule
+}
+
+Screen --> AuthViewModel
+Screen --> HomeViewModel
+Screen --> ProfileViewModel
+
+AuthViewModel --> UseCase
+HomeViewModel --> UseCase
+ProfileViewModel --> UseCase
+NotificationsViewModel --> UseCase
+
+UseCase --> AuthRepository
+UseCase --> UserRepository
+UseCase --> BranchRepository
+UseCase --> NotificationsRepository
+UseCase --> SavedAntrianRepository
+
+AuthRepository --> ApiServices
+UserRepository --> ApiServices
+BranchRepository --> ApiServices
+NotificationsRepository --> ApiServices
+
+AuthRepository --> TokenManager
+
+SavedAntrianRepository --> AntrianDao
+SavedAntrianRepository --> DataMapperSaved
+
+ApiClient --> ApiServices
+ApiClient --> AuthInterceptor
+
+AppDatabase --> AntrianDao
+AntrianDao --> SavedAntrianEntity
+
+@enduml
