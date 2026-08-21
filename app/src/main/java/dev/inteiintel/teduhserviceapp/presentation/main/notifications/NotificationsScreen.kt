@@ -139,39 +139,11 @@ fun NotificationsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "Pusat Notifikasi",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp,
-                                color = Color.White
-                            )
-
-                            if (unreadCount > 0) {
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(Color(0xFFFF3B30))
-                                        .padding(horizontal = 8.dp, vertical = 2.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = if (unreadCount > 99) "99+ baru" else "$unreadCount baru",
-                                        fontSize = 10.sp,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(2.dp))
-
                         Text(
-                            text = "Info terkini promo & antrean servis motor Anda",
-                            fontSize = 12.sp,
-                            color = Color.White.copy(alpha = 0.8f)
+                            text = "Pusat Notifikasi",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            color = Color.White
                         )
                     }
 
