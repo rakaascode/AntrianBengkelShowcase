@@ -31,7 +31,7 @@ class AntreanActiveRepositoryTest {
         nomor_antrian = 3,
         status = "menunggu",
         nama_pemilik = "Andi",
-        no_hp = "081234567890",
+        no_polisi = "B 5678 ABC",
         merk_motor = "Honda",
         tipe_motor = "Beat",
         no_rangka = "MH1JFZ123",
@@ -61,7 +61,7 @@ class AntreanActiveRepositoryTest {
     @Test
     fun `getAntreanActive - sukses mengembalikan list antrean aktif`() = runTest {
         // Given
-        val response = AntreanActiveModelResponse(data = listOf(dummyAntreanData))
+        val response = AntreanActiveModelResponse(success = true, data = listOf(dummyAntreanData))
         coEvery { apiServices.getAntreanActive() } returns response
 
         // When
@@ -76,7 +76,7 @@ class AntreanActiveRepositoryTest {
     @Test
     fun `getAntreanActive - list kosong dikembalikan jika tidak ada antrean`() = runTest {
         // Given
-        coEvery { apiServices.getAntreanActive() } returns AntreanActiveModelResponse(data = emptyList())
+        coEvery { apiServices.getAntreanActive() } returns AntreanActiveModelResponse(success = true, data = emptyList())
 
         // When
         val result = repository.getAntreanActive()
@@ -102,7 +102,7 @@ class AntreanActiveRepositoryTest {
     @Test
     fun `getAntreanActive - data antrean memiliki field yang benar`() = runTest {
         // Given
-        coEvery { apiServices.getAntreanActive() } returns AntreanActiveModelResponse(data = listOf(dummyAntreanData))
+        coEvery { apiServices.getAntreanActive() } returns AntreanActiveModelResponse(success = true, data = listOf(dummyAntreanData))
 
         // When
         val result = repository.getAntreanActive()

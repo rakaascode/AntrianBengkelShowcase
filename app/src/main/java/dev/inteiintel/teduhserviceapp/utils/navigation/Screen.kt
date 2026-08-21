@@ -102,6 +102,15 @@ sealed class Screen(val route: String) {
     /** Konfirmasi ringkasan data antrian sebelum dikirim ke server. */
     object KonfirmasiAntrean : Screen("konfirmasi_antrean")
 
+    /** Pantau antrian realtime — user memilih cabang lalu melihat status antriannya. */
+    object PantauAntrian : Screen("pantau_antrian")
+
+    /** Panduan tips perawatan kendaraan. */
+    object Panduan : Screen("panduan")
+
+    /** Detail Promo dan penawaran spesial bengkel. */
+    object DetailPromo : Screen("detail_promo")
+
     // ── Layar Development / Percobaan (tidak dipakai di production) ────────────
 
     /** @suppress */

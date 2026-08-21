@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,6 +64,7 @@ import dev.inteiintel.teduhserviceapp.presentation.main.profile.ProfileScreen
 import dev.inteiintel.teduhserviceapp.ui.theme.DarkOrange
 import dev.inteiintel.teduhserviceapp.ui.theme.DimGray
 import dev.inteiintel.teduhserviceapp.ui.theme.GhostWhite
+import dev.inteiintel.teduhserviceapp.ui.theme.MidnightBlue
 import dev.inteiintel.teduhserviceapp.ui.theme.PrimBlue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -251,82 +254,73 @@ fun BottomBar(navController: NavHostController) {
 
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    Box(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 4.dp),
-        contentAlignment = Alignment.Center
+            .navigationBarsPadding(),
+        color = Color.White,
+        shadowElevation = 0.dp,
+        tonalElevation = 0.dp
     ) {
-        Surface(
-            shape = RoundedCornerShape(28.dp),
-            color = Color.White.copy(alpha = 0.98f),
-            tonalElevation = 0.dp,
-            shadowElevation = 12.dp,
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF0F3F9)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(68.dp)
-        ) {
+        Column {
+            // Divider tipis di atas bar
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = Color(0xFFE8ECF4)
+            )
+
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .fillMaxWidth()
+                    .height(64.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 items.forEach { item ->
                     val isSelected = currentRoute == item.route
 
-                    val activeBgColor by androidx.compose.animation.animateColorAsState(
-                        targetValue = if (isSelected) Color(0xFFEFF2FF) else Color.Transparent,
-                        label = "activeBg"
+                    val contentColor by androidx.compose.animation.animateColorAsState(
+                        targetValue = if (isSelected) MidnightBlue else Color(0xFFADB5C7),
+                        animationSpec = androidx.compose.animation.core.tween(durationMillis = 200),
+                        label = "contentColor"
                     )
-                    val activeContentColor by androidx.compose.animation.animateColorAsState(
-                        targetValue = if (isSelected) Color(0xFF0F1A65) else Color(0xFF94A3B8),
-                        label = "activeColor"
-                    )
-
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(activeBgColor)
-                            .clickable {
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
                                 if (!isSelected) {
                                     navController.navigate(item.route) {
-                                        popUpTo(Screen.Home.route) {
-                                            saveState = true
-                                        }
+                                        popUpTo(Screen.Home.route) { saveState = true }
                                         launchSingleTop = true
                                         restoreState = true
                                     }
                                 }
-                            }
-                            .padding(vertical = 4.dp),
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = item.label,
-                                    tint = activeContentColor,
-                                    modifier = Modifier.size(if (isSelected) 22.dp else 20.dp)
-                                )
-                            }
 
-                            Spacer(modifier = Modifier.height(3.dp))
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                tint = contentColor,
+                                modifier = Modifier.size(22.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             Text(
                                 text = item.label,
-                                fontSize = if (isSelected) 11.sp else 10.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = activeContentColor,
+                                fontSize = 10.sp,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                color = contentColor,
                                 maxLines = 1
                             )
                         }

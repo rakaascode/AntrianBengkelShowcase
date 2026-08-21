@@ -24,6 +24,10 @@ class RingkasanHomeViewModel @Inject constructor(
     private val _nearestCabang = MutableStateFlow<RingkasanCabangItem?>(null)
     val nearestCabang: StateFlow<RingkasanCabangItem?> = _nearestCabang
 
+    /** Semua cabang — digunakan oleh PantauAntrianScreen */
+    private val _allCabang = MutableStateFlow<List<RingkasanCabangItem>>(emptyList())
+    val allCabang: StateFlow<List<RingkasanCabangItem>> = _allCabang.asStateFlow()
+
     private val _error = MutableStateFlow<String?>(null)
 
     fun getNearBranch(userLat: Double, userLng: Double) {
@@ -61,6 +65,22 @@ class RingkasanHomeViewModel @Inject constructor(
                     _nearestCabang.value = active
                 }
                 .onFailure { error ->
+                    _error.value = error.message
+                }
+            _loading.value = false
+        }
+    }
+
+    /** Ambil semua cabang untuk halaman Pantau Antrian */
+    fun getAllBranches() {
+        viewModelScope.launch {
+            _loading.value = true
+            repository.getRingkasanHome()
+                .onSuccess { response ->
+                    _allCabang.value = response.data
+                }
+                .onFailure { error ->
+                    Log.e("RingkasanVM", "getAllBranches error: ${error.message}")
                     _error.value = error.message
                 }
             _loading.value = false

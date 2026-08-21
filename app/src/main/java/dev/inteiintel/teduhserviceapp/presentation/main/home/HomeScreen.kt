@@ -1,12 +1,5 @@
 package dev.inteiintel.teduhserviceapp.presentation.main.home
 
-import android.Manifest
-import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,11 +19,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,84 +36,38 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import dev.inteiintel.teduhserviceapp.R
-import dev.inteiintel.teduhserviceapp.data.model.RingkasanCabangItem
 import dev.inteiintel.teduhserviceapp.data.model.UserData
 import dev.inteiintel.teduhserviceapp.presentation.main.home.detail_cabang.daftar_cabang.DaftarCabangViewModel
 import dev.inteiintel.teduhserviceapp.presentation.main.profile.ProfileViewModel
 import dev.inteiintel.teduhserviceapp.ui.theme.PrimBlue
-import dev.inteiintel.teduhserviceapp.utils.LocationUtils
 import dev.inteiintel.teduhserviceapp.utils.navigation.Screen
 import java.util.Calendar
 
-@OptIn(ExperimentalPermissionsApi::class)
+
 @Composable
 fun HomeScreen(
     profileViewModel: ProfileViewModel = hiltViewModel(),
     daftarCabangViewModel: DaftarCabangViewModel = hiltViewModel(),
-    ringkasanViewModel: RingkasanHomeViewModel = hiltViewModel(),
     navHostController: NavHostController
 ) {
 
-    val context = LocalContext.current
-
     val profile = profileViewModel.getProfile.collectAsState().value
-    val nearestCabang = ringkasanViewModel.nearestCabang.collectAsState().value
-    val loading = ringkasanViewModel.loading.collectAsState().value
 
-    // Tampilkan card HANYA jika ada antrian aktif di cabang terdekat.
-    // Jika sisaAntrian == 0 dan nomorDipanggil == null, card disembunyikan.
-    val showQueueCard = nearestCabang != null &&
-            (nearestCabang.nomorDipanggil != null || nearestCabang.sisaAntrian > 0)
-
-    val locationPermissionState = rememberPermissionState(
-        permission = Manifest.permission.ACCESS_FINE_LOCATION
-    )
-
-    // 1️⃣ Load data ringkasan LANGSUNG — tidak tunggu lokasi
-    //    Ini memastikan card tetap muncul meski GPS tidak tersedia
     LaunchedEffect(Unit) {
-        Log.d("HOME_DEBUG", "HomeScreen launched — load data awal")
         profileViewModel.loadProfile()
         daftarCabangViewModel.loadDataCabang()
-        ringkasanViewModel.getNearBranchWithoutLocation()  // load tanpa GPS dulu
     }
 
-    // 2️⃣ Minta izin lokasi terpisah
-    LaunchedEffect(Unit) {
-        locationPermissionState.launchPermissionRequest()
-    }
 
-    // 3️⃣ Jika izin sudah granted → refine dengan lokasi GPS untuk akurasi lebih baik
-    LaunchedEffect(locationPermissionState.status) {
-        if (locationPermissionState.status.isGranted) {
-            Log.d("HOME_DEBUG", "Permission granted — refine dengan GPS")
-            LocationUtils.getUserLocation(
-                context = context,
-                onResult = { lat, lng ->
-                    Log.d("HOME_DEBUG", "LOCATION OK: $lat , $lng")
-                    ringkasanViewModel.getNearBranch(userLat = lat, userLng = lng)
-                },
-                onError = {
-                    Log.e("HOME_DEBUG", "GPS gagal — tetap pakai data awal")
-                    // data dari getNearBranchWithoutLocation() sudah ada, tidak perlu action
-                }
-            )
-        }
-    }
 
     LazyColumn(
         modifier = Modifier
@@ -141,32 +87,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                if (loading) {
-
-
-                } else {
-
-                    AnimatedVisibility(
-                        visible = showQueueCard,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-
-                        nearestCabang?.let {
-                            CurrentQueueCard(it)
-                        }
-                    }
-                }
-
-                AnimatedVisibility(
-                    visible = showQueueCard,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                PromoBanner()
+                PromoBanner(navHostController)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -210,104 +131,9 @@ fun HeaderSection(user: UserData?) {
     }
 }
 
-@Composable
-fun CurrentQueueCard(
-    cabang: RingkasanCabangItem
-) {
-
-    // Tentukan teks nomor antrian yang dipanggil
-    val nomorText = when {
-        cabang.nomorDipanggil != null && cabang.nomorDipanggil != 0 -> "A${cabang.nomorDipanggil}"
-        cabang.sisaAntrian > 0 -> "-"
-        else -> "-"
-    }
-
-    // Progress bar dinamis — estimasi maks 30 antrian per hari
-    val progress = when {
-        cabang.sisaAntrian <= 0 -> 1f
-        else -> (1f - (cabang.sisaAntrian.toFloat() / 30f)).coerceIn(0f, 1f)
-    }
-
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-
-                Text(
-                    text = "ANTRIAN HARI INI",
-                    color = Color.Black,
-                    fontSize = 12.sp
-                )
-
-                Text(
-                    text = cabang.namaCabang,
-                    fontSize = 12.sp,
-                    color = Color.White,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .width(80.dp)
-                        .background(
-                            Color(0xFFFF7A00),
-                            RoundedCornerShape(20)
-                        )
-                        .padding(
-                            horizontal = 12.dp,
-                            vertical = 4.dp
-                        )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = nomorText,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier.fillMaxWidth(),
-                color = Color(0xFF1C1F4A)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-
-                Text(
-                    text = "Estimasi: ${cabang.estimasiJam.ifBlank { "-" }}",
-                    color = Color.Gray,
-                    fontSize = 14.sp
-                )
-
-                Text(
-                    text = "${cabang.sisaAntrian} Antrian lagi",
-                    fontSize = 14.sp
-                )
-            }
-        }
-    }
-}
 
 @Composable
-fun PromoBanner() {
+fun PromoBanner(navController: NavController) {
 
     Box(
         modifier = Modifier
@@ -322,6 +148,9 @@ fun PromoBanner() {
                     )
                 )
             )
+            .clickable {
+                navController.navigate(Screen.DetailPromo.route)
+            }
     ) {
 
         Image(
@@ -343,7 +172,9 @@ fun PromoBanner() {
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
                     .background(Color.White.copy(alpha = 0.15f))
-                    .clickable { }
+                    .clickable {
+                        navController.navigate(Screen.DetailPromo.route)
+                    }
                     .padding(
                         horizontal = 12.dp,
                         vertical = 6.dp
@@ -369,35 +200,34 @@ fun PromoBanner() {
     }
 }
 
+sealed class HomeMenuIcon {
+    data class Vector(val imageVector: androidx.compose.ui.graphics.vector.ImageVector) : HomeMenuIcon()
+    data class Drawable(val resId: Int) : HomeMenuIcon()
+}
+
+data class HomeMenuItem(
+    val title: String,
+    val route: String,
+    val icon: HomeMenuIcon
+)
+
 @Composable
 fun MenuGrid(navController: NavController) {
 
-    val menus = listOf(
-        "Cabang Terdekat",
-        "Ambil Antrian",
-        "Riwayat",
-        "Pengingat"
-    )
-
-    val route = listOf(
-        Screen.DaftarCabang.route,
-        Screen.AmbilAntreanFromBeranda.route,
-        Screen.Riyawat.route,
-        Screen.Pengingat.route
-    )
-
-    val icons = listOf(
-        R.drawable.ic_maps,
-        R.drawable.ic_que,
-        R.drawable.ic_history,
-        R.drawable.ic_clock
+    val menuItems = listOf(
+        HomeMenuItem("Cabang Terdekat", Screen.DaftarCabang.route, HomeMenuIcon.Drawable(R.drawable.ic_maps)),
+        HomeMenuItem("Ambil Antrian", Screen.AmbilAntreanFromBeranda.route, HomeMenuIcon.Drawable(R.drawable.ic_que)),
+        HomeMenuItem("Riwayat", Screen.Riyawat.route, HomeMenuIcon.Drawable(R.drawable.ic_history)),
+        HomeMenuItem("Pengingat", Screen.Pengingat.route, HomeMenuIcon.Drawable(R.drawable.ic_clock)),
+        HomeMenuItem("Pantau Antrian", Screen.PantauAntrian.route, HomeMenuIcon.Vector(Icons.Default.ConfirmationNumber)),
+        HomeMenuItem("Panduan", Screen.Panduan.route, HomeMenuIcon.Drawable(R.drawable.ic_ob))
     )
 
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
 
-        for (row in 0 until 2) {
+        for (row in 0 until 3) {
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -407,20 +237,22 @@ fun MenuGrid(navController: NavController) {
                 for (col in 0 until 2) {
 
                     val index = row * 2 + col
+                    val item = menuItems[index]
 
                     Card(
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
                             .weight(1f)
-                            .height(120.dp)
-                            ,
+                            .height(120.dp),
                         elevation = CardDefaults.cardElevation(2.dp)
                     ) {
 
                         Column(
-                            modifier = Modifier.fillMaxSize().clickable {
-                                navController.navigate(route[index])
-                            },
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable {
+                                    navController.navigate(item.route)
+                                },
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -433,18 +265,30 @@ fun MenuGrid(navController: NavController) {
                                     .background(PrimBlue)
                             ) {
 
-                                Icon(
-                                    painter = painterResource(id = icons[index]),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                    tint = Color.White
-                                )
+                                when (val icon = item.icon) {
+                                    is HomeMenuIcon.Vector -> {
+                                        Icon(
+                                            imageVector = icon.imageVector,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp),
+                                            tint = Color.White
+                                        )
+                                    }
+                                    is HomeMenuIcon.Drawable -> {
+                                        Icon(
+                                            painter = painterResource(id = icon.resId),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp),
+                                            tint = Color.White
+                                        )
+                                    }
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = menus[index],
+                                text = item.title,
                                 fontSize = 14.sp
                             )
                         }

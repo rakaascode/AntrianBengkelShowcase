@@ -26,6 +26,29 @@ class ReminderRepository @Inject constructor(
     }
 
     /**
+     * Mengirim/update nomor WhatsApp pengguna langsung via PUT.
+     *
+     * Berbeda dengan [simpanAtauUpdateNoWa], fungsi ini tidak melakukan cek GET terlebih dahulu
+     * dan langsung memanggil PUT /users/kontak. Digunakan untuk trigger pengiriman reminder WA.
+     *
+     * @param noWa Nomor WhatsApp tujuan pengiriman reminder.
+     */
+    suspend fun sendWhatsappReminder(
+        noWa: String
+    ): Result<ReminderModelsResponse> {
+        return try {
+            val response = apiService.updateNoWa(ReminderModelsRequest(no_wa = noWa))
+            if (response.success) {
+                Result.success(response)
+            } else {
+                Result.failure(Exception(response.message))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Menyimpan atau memperbarui nomor WhatsApp pengguna.
      *
      * Jika nomor WA belum ada → POST /users/kontak (simpan pertama kali).

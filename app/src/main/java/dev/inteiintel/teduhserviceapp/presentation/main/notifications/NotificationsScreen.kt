@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -56,6 +57,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import dev.inteiintel.teduhserviceapp.R
 import dev.inteiintel.teduhserviceapp.data.model.NotificationData
+import dev.inteiintel.teduhserviceapp.ui.theme.DarkSlate
+import dev.inteiintel.teduhserviceapp.ui.theme.SnowWhite
 import dev.inteiintel.teduhserviceapp.utils.navigation.Screen
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -94,53 +97,30 @@ fun NotificationsScreen(
             .fillMaxSize()
             .background(Color(0xFFF0F3FB))
     ) {
-        // ─── Header Modern Startup ──────────────────────────────────────────
+        // ─── Header Top Bar (Konsisten dengan Top Bar App) ───────────────────
         Box(
             modifier = Modifier
+                .background(SnowWhite)
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF0F1A65),
-                            Color(0xFF1B2B8E),
-                            Color(0xFF263DB5)
-                        )
-                    )
-                )
-                .padding(top = 26.dp, bottom = 22.dp, start = 20.dp, end = 20.dp)
+                .padding(vertical = 10.dp, horizontal = 10.dp)
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "Pusat Notifikasi",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            color = Color.White
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.15f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Campaign,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Notifikasi",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = DarkSlate
+                )
             }
         }
+
+        HorizontalDivider(thickness = 1.dp, color = Color(0xFFE8ECF4))
 
 
         // ─── Content + Pull-to-Refresh ───────────────────────────────────────

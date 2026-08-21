@@ -35,6 +35,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,6 +64,7 @@ import dev.inteiintel.teduhserviceapp.presentation.main.LogoutButtonTest
 import dev.inteiintel.teduhserviceapp.R
 import dev.inteiintel.teduhserviceapp.data.model.UserData
 import dev.inteiintel.teduhserviceapp.presentation.auth.AuthViewModel
+import dev.inteiintel.teduhserviceapp.ui.theme.DarkSlate
 import dev.inteiintel.teduhserviceapp.ui.theme.DimGray
 import dev.inteiintel.teduhserviceapp.ui.theme.SnowWhite
 import dev.inteiintel.teduhserviceapp.ui.theme.TeduhServiceAppTheme
@@ -85,38 +87,64 @@ fun ProfileScreen(
         profileViewModel.loadProfile()
     }
 
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF6F8FD))
     ) {
-        item {
-            HeroProfileHeader(user = userProfile, navController = toDetail)
-        }
-
-        item {
-            Column(
+        // ─── Header Top Bar (Konsisten dengan Top Bar App) ───────────────────
+        Box(
+            modifier = Modifier
+                .background(SnowWhite)
+                .fillMaxWidth()
+                .padding(vertical = 10.dp, horizontal = 10.dp)
+        ) {
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 18.dp)
-                    .offset(y = (-28).dp)
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
+                Text(
+                    text = "Akun Saya",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = DarkSlate
+                )
+            }
+        }
+
+        HorizontalDivider(thickness = 1.dp, color = Color(0xFFE8ECF4))
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(4.dp))
+                HeroProfileCard(user = userProfile, navController = toDetail)
+            }
+
+            item {
                 QuickStatsCard(user = userProfile, navController = toDetail)
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
+            item {
                 ServicesMenuSection(navController = toDetail)
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
+            item {
                 GeneralSettingsSection(navController = toDetail)
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
+            item {
                 HelpAndInfoSection(navController = toDetail)
+            }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
+            item {
                 LogoutButtonSection(
                     onLogout = {
                         scope.launch {
@@ -127,73 +155,38 @@ fun ProfileScreen(
                         }
                     }
                 )
+            }
 
-                Spacer(modifier = Modifier.height(30.dp))
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
 }
 
 @Composable
-fun HeroProfileHeader(user: UserData?, navController: NavController) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF0F1A65),
-                        Color(0xFF1B2B8E),
-                        Color(0xFF263DB5)
-                    )
-                )
-            )
-            .padding(top = 28.dp, bottom = 48.dp, start = 20.dp, end = 20.dp)
+fun HeroProfileCard(user: UserData?, navController: NavController) {
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Akun Saya",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.15f))
-                        .clickable {
-                            navController.navigate(Screen.EditProfileScreen.route)
-                        }
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "Edit Profil",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
-                        .size(76.dp)
+                        .size(68.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f))
-                        .border(2.5.dp, Color.White, CircleShape),
+                        .background(Color(0xFFF1F5F9))
+                        .border(2.dp, Color(0xFFE2E8F0), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
@@ -202,19 +195,19 @@ fun HeroProfileHeader(user: UserData?, navController: NavController) {
                         placeholder = painterResource(id = R.drawable.img_kantor),
                         error = painterResource(id = R.drawable.img_kantor),
                         modifier = Modifier
-                            .size(70.dp)
+                            .size(64.dp)
                             .clip(CircleShape)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(14.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = user?.name ?: "Pengguna Lautan Teduh",
-                        fontSize = 18.sp,
+                        fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = DarkSlate,
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
@@ -223,8 +216,8 @@ fun HeroProfileHeader(user: UserData?, navController: NavController) {
 
                     Text(
                         text = user?.email ?: "Memuat data...",
-                        fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.8f),
+                        fontSize = 12.sp,
+                        color = Color.Gray,
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
@@ -233,18 +226,36 @@ fun HeroProfileHeader(user: UserData?, navController: NavController) {
 
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFFFF9800))
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color(0xFFFF9800).copy(alpha = 0.12f))
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
                         Text(
                             text = if (user?.role == "admin") "ADMIN CABANG" else "MEMBER RESMI",
-                            color = Color.White,
+                            color = Color(0xFFD97706),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            OutlinedButton(
+                onClick = { navController.navigate(Screen.EditProfileScreen.route) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(38.dp),
+                shape = RoundedCornerShape(10.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFCBD5E1))
+            ) {
+                Text(
+                    text = "Edit Profil",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = DarkSlate
+                )
             }
         }
     }
@@ -731,7 +742,7 @@ fun PreviewProfileScreen() {
     TeduhServiceAppTheme {
         val navController = rememberNavController()
 
-        HeroProfileHeader(
+        HeroProfileCard(
             user = UserData(
                 id = 1,
                 name = "Budi Santoso",

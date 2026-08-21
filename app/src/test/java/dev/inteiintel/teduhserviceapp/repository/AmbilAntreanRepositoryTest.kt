@@ -24,7 +24,7 @@ class AmbilAntreanRepositoryTest {
     private val dummyRequest = CreateAntrianRequest(
         cabang_id = 1,
         nama_pemilik = "Budi Santoso",
-        no_hp = "081234567890",
+        no_polisi = "B 1234 XYZ",
         merk_motor = "Yamaha",
         tipe_motor = "NMAX",
         no_rangka = "MH3SG1234",
@@ -44,7 +44,7 @@ class AmbilAntreanRepositoryTest {
         nomor_antrian = 7,
         status = "menunggu",
         nama_pemilik = "Budi Santoso",
-        no_hp = "081234567890",
+        no_polisi = "B 1234 XYZ",
         merk_motor = "Yamaha",
         tipe_motor = "NMAX",
         no_rangka = "MH3SG1234",

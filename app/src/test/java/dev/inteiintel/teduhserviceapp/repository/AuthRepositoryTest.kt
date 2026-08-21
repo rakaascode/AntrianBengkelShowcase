@@ -23,7 +23,7 @@ class AuthRepositoryTest {
     private lateinit var authRepository: AuthRepository
 
     // Helper: dummy AuthResponse
-    private val dummyUser = User(id = 1, name = "Budi", email = "budi@email.com", role = "user")
+    private val dummyUser = User(id = 1, name = "Budi", email = "budi@email.com", avatar_url = null, role = "user")
     private val dummyAuthData = AuthData(token = "token_abc123", user = dummyUser)
     private val dummyAuthResponse = AuthResponse(
         success = true,

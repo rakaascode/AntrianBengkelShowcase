@@ -113,34 +113,63 @@ fun ReminderScreen(
         },
         containerColor = SurfaceBackground
     ) { paddingValues ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // ── HERO HEADER ───────────────────────────────────────────────────
-            item {
-                HeroReminderHeader(
-                    onBack = { navController.popBackStack() }
-                )
-            }
-
-            // ── MAIN CONTENT (CARDS) ──────────────────────────────────────────
-            item {
-                Column(
+            // ─── Top Bar Standar (Konsisten) ──────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .background(Color.White)
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp, horizontal = 10.dp)
+            ) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .offset(y = (-24).dp)
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
+                    Text(
+                        text = "Pengingat",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = TextDark
+                    )
+                }
+
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Kembali",
+                        modifier = Modifier.size(24.dp),
+                        tint = TextDark
+                    )
+                }
+            }
+
+            HorizontalDivider(thickness = 1.dp, color = Color(0xFFE8ECF4))
+
+            // ─── List Konten ──────────────────────────────────────────────────
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                item {
+                    Spacer(modifier = Modifier.height(4.dp))
+
                     // 1. MASTER TOGGLE CARD
                     MasterToggleCard(
                         enabled = notificationEnabled,
                         onCheckedChange = { notificationEnabled = it }
                     )
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
+                item {
                     // 2. WHATSAPP REMINDER STATUS CARD
                     WhatsAppReminderCard(
                         enabled = notificationEnabled,
@@ -160,18 +189,20 @@ fun ReminderScreen(
                             }
                         }
                     )
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
+                item {
                     // 3. REMINDER TIMING & INFO CARD
                     ReminderTimingCard(enabled = notificationEnabled)
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
+                item {
                     // 4. HOW IT WORKS / BENEFIT CARD
                     HowItWorksCard()
+                }
 
-                    Spacer(modifier = Modifier.height(28.dp))
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
             }
         }

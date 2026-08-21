@@ -40,6 +40,9 @@ import dev.inteiintel.teduhserviceapp.presentation.main.home.detail_cabang.Detai
 import dev.inteiintel.teduhserviceapp.presentation.main.home.detail_cabang.daftar_cabang.DaftarCabangScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.home.detail_cabang.daftar_cabang.DaftarCabangViewModel
 import dev.inteiintel.teduhserviceapp.presentation.main.home.history.HistoryScreen
+import dev.inteiintel.teduhserviceapp.presentation.main.home.panduan.PanduanScreen
+import dev.inteiintel.teduhserviceapp.presentation.main.home.pantau_antrian.PantauAntrianScreen
+import dev.inteiintel.teduhserviceapp.presentation.main.home.promo.DetailPromoScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.home.reminder.ReminderScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.notifications.detail_notifikasi.DetailNotifikasiScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.profile.edit_profile.EditProfileScreen
@@ -169,6 +172,18 @@ fun AppNavGraph() {
 
             composable (Screen.Riyawat.route){
                 HistoryScreen(navController= navController)
+            }
+
+            composable(Screen.PantauAntrian.route) {
+                PantauAntrianScreen(navController = navController)
+            }
+
+            composable(Screen.Panduan.route) {
+                PanduanScreen(navController = navController)
+            }
+
+            composable(Screen.DetailPromo.route) {
+                DetailPromoScreen(navController = navController)
             }
 
             composable(Screen.AmbilAntreanFromBeranda.route) {

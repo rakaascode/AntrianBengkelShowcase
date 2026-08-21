@@ -15,6 +15,7 @@ class AuthModelTest {
         id = 1,
         name = "Budi Santoso",
         email = "budi@email.com",
+        avatar_url = null,
         role = "user"
     )
 

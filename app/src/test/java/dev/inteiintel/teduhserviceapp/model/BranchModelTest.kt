@@ -35,8 +35,8 @@ class BranchModelTest {
 
     @Test
     fun `Branch - koordinat lat dan lng tersedia`() {
-        assertEquals(-6.2088, sampleBranch.latitude)
-        assertEquals(106.8456, sampleBranch.longitude)
+        assertEquals(-6.2088, sampleBranch.latitude!!, 0.0001)
+        assertEquals(106.8456, sampleBranch.longitude!!, 0.0001)
     }
 
     @Test
@@ -96,13 +96,13 @@ class BranchModelTest {
     fun `BranchWithDistance - menyimpan cabang dan jarak dengan benar`() {
         val bwd = BranchWithDistance(branch = sampleBranch, distanceKm = 3.75)
         assertEquals(sampleBranch, bwd.branch)
-        assertEquals(3.75, bwd.distanceKm, 0.001)
+        assertEquals(3.75, bwd.distanceKm!!, 0.001)
     }
 
     @Test
     fun `BranchWithDistance - jarak nol untuk lokasi yang sama`() {
         val bwd = BranchWithDistance(branch = sampleBranch, distanceKm = 0.0)
-        assertEquals(0.0, bwd.distanceKm, 0.0)
+        assertEquals(0.0, bwd.distanceKm!!, 0.0)
     }
 
     @Test
@@ -112,8 +112,8 @@ class BranchModelTest {
         val far   = BranchWithDistance(sampleBranch.copy(id = 3), 20.5)
         val list  = listOf(far, near, mid).sortedBy { it.distanceKm }
 
-        assertEquals(1.2,  list[0].distanceKm, 0.001)
-        assertEquals(5.0,  list[1].distanceKm, 0.001)
-        assertEquals(20.5, list[2].distanceKm, 0.001)
+        assertEquals(1.2,  list[0].distanceKm!!, 0.001)
+        assertEquals(5.0,  list[1].distanceKm!!, 0.001)
+        assertEquals(20.5, list[2].distanceKm!!, 0.001)
     }
 }
