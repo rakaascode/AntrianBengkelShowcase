@@ -46,10 +46,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import dev.inteiintel.teduhserviceapp.R
-import dev.inteiintel.teduhserviceapp.data.model.OnBoarding
+import dev.inteiintel.teduhserviceapp.data.model.OnBoardingModel
 import dev.inteiintel.teduhserviceapp.utils.navigation.Screen
 import dev.inteiintel.teduhserviceapp.ui.theme.DarkOrange
 import dev.inteiintel.teduhserviceapp.ui.theme.DarkSlate
@@ -57,14 +57,26 @@ import dev.inteiintel.teduhserviceapp.ui.theme.DimGray
 import dev.inteiintel.teduhserviceapp.ui.theme.MidnightBlue
 import kotlinx.coroutines.delay
 
+/**
+ * Layar autentikasi aplikasi yang menggabungkan onboarding dan tombol login Google.
+ *
+ * Menampilkan slider 3 halaman onboarding ([HorizontalPager]) yang bergulir otomatis tiap 5 detik.
+ * Jika pengguna sudah login (refresh token tersedia), langsung diarahkan ke [Screen.Main].
+ *
+ * @param viewModel ViewModel autentikasi, diinjeksi oleh Hilt.
+ * @param navController Controller navigasi untuk berpindah ke [Screen.Main] setelah login.
+ *
+ * @see dev.inteiintel.teduhserviceapp.presentation.auth.AuthViewModel
+ * @see dev.inteiintel.teduhserviceapp.utils.navigation.Screen
+ */
 @Composable
-fun AuthLoginScreen(viewModel: AuthViewModel= viewModel (),navController: NavController){
+fun AuthLoginScreen(viewModel: AuthViewModel = hiltViewModel(), navController: NavController) {
     val context = LocalContext.current
     val loadingState = viewModel.loading.collectAsState()
 
     val pagerState = rememberPagerState(pageCount = {3})
 
-    val onBoardingContentState by  viewModel.getDataOnBoarding.collectAsState()
+    val onBoardingContentState by  viewModel.getDataOnBoardingModel.collectAsState()
 
     LaunchedEffect(pagerState) {
         while (true) {
@@ -161,10 +173,18 @@ fun AuthLoginScreen(viewModel: AuthViewModel= viewModel (),navController: NavCon
 }
 
 
+/**
+ * Konten satu halaman onboarding: gambar, judul dua baris, dan subjudul.
+ *
+ * @param currentPageIndex Indeks halaman saat ini (0–2).
+ * @param contentOnBoardingModel Daftar model konten onboarding dari [AuthViewModel].
+ *
+ * @see dev.inteiintel.teduhserviceapp.data.model.OnBoardingModel
+ */
 @Composable
-fun OnBoardingContent(currentPageIndex: Int, contentOnBoarding: List<OnBoarding>)
+fun OnBoardingContent(currentPageIndex: Int, contentOnBoardingModel: List<OnBoardingModel>)
 {
-    val item =contentOnBoarding[currentPageIndex]
+    val item =contentOnBoardingModel[currentPageIndex]
 
     Column (Modifier.fillMaxWidth().fillMaxHeight(), verticalArrangement = Arrangement.Center){
 
@@ -200,6 +220,16 @@ fun OnBoardingContent(currentPageIndex: Int, contentOnBoarding: List<OnBoarding>
 }
 
 
+/**
+ * Indikator titik (dot) animasi untuk menunjukkan halaman aktif pada pager onboarding.
+ *
+ * Titik yang aktif melebar secara animasi dan berubah warna ke [MidnightBlue],
+ * sementara titik inaktif berwarna abu-abu.
+ *
+ * @param pageCount Total jumlah halaman pada pager.
+ * @param currentPageIndex Indeks halaman yang sedang aktif.
+ * @param modifier Modifier Compose opsional.
+ */
 @Composable
 fun PagerIndicator(
     pageCount: Int,

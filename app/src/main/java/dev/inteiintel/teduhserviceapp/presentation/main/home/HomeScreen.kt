@@ -1,195 +1,490 @@
 package dev.inteiintel.teduhserviceapp.presentation.main.home
 
-import android.annotation.SuppressLint
+import android.Manifest
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.MapView
-import com.mapbox.maps.Style
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import dev.inteiintel.teduhserviceapp.R
+import dev.inteiintel.teduhserviceapp.data.model.RingkasanCabangItem
+import dev.inteiintel.teduhserviceapp.data.model.UserData
+import dev.inteiintel.teduhserviceapp.presentation.main.home.detail_cabang.daftar_cabang.DaftarCabangViewModel
+import dev.inteiintel.teduhserviceapp.presentation.main.profile.ProfileViewModel
+import dev.inteiintel.teduhserviceapp.ui.theme.PrimBlue
+import dev.inteiintel.teduhserviceapp.utils.LocationUtils
+import dev.inteiintel.teduhserviceapp.utils.navigation.Screen
+import java.util.Calendar
 
-data class Branch(
-    val name: String,
-    val lat: Double,
-    val lng: Double,
-    val distance: String,
-    val queue: String,
-    val estimate: String
-)
-
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    profileViewModel: ProfileViewModel = hiltViewModel(),
+    daftarCabangViewModel: DaftarCabangViewModel = hiltViewModel(),
+    ringkasanViewModel: RingkasanHomeViewModel = hiltViewModel(),
+    navHostController: NavHostController
+) {
 
-    val branches = listOf(
-        Branch("Yamaha Central Lampung", -5.1133, 105.3067, "1.2 km", "A12", "15m"),
-        Branch("Lautan Teduh Metro", -5.1200, 105.3100, "2.0 km", "B10", "20m"),
-        Branch("Yamaha Bandar Jaya", -5.1300, 105.3200, "3.1 km", "C05", "25m"),
-        Branch("Yamaha Trimurjo", -5.1400, 105.3300, "4.0 km", "D02", "30m")
+    val context = LocalContext.current
+
+    val profile = profileViewModel.getProfile.collectAsState().value
+    val nearestCabang = ringkasanViewModel.nearestCabang.collectAsState().value
+    val loading = ringkasanViewModel.loading.collectAsState().value
+
+    // Tampilkan card HANYA jika ada antrian aktif di cabang terdekat.
+    // Jika sisaAntrian == 0 dan nomorDipanggil == null, card disembunyikan.
+    val showQueueCard = nearestCabang != null &&
+            (nearestCabang.nomorDipanggil != null || nearestCabang.sisaAntrian > 0)
+
+    val locationPermissionState = rememberPermissionState(
+        permission = Manifest.permission.ACCESS_FINE_LOCATION
     )
 
-
-    var selectedLocation by remember {
-        mutableStateOf(Point.fromLngLat(105.3067, -5.1133))
+    // 1️⃣ Load data ringkasan LANGSUNG — tidak tunggu lokasi
+    //    Ini memastikan card tetap muncul meski GPS tidak tersedia
+    LaunchedEffect(Unit) {
+        Log.d("HOME_DEBUG", "HomeScreen launched — load data awal")
+        profileViewModel.loadProfile()
+        daftarCabangViewModel.loadDataCabang()
+        ringkasanViewModel.getNearBranchWithoutLocation()  // load tanpa GPS dulu
     }
 
+    // 2️⃣ Minta izin lokasi terpisah
+    LaunchedEffect(Unit) {
+        locationPermissionState.launchPermissionRequest()
+    }
 
-
-    Box(modifier = Modifier.fillMaxSize()) {
-
-        // MAP DUMMY
-        MapboxView(selectedLocation)
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .heightIn(max = 260.dp)
-                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                .background(Color(0xFFF5F5F5))
-                .padding(vertical = 10.dp, )
-        ) {
-
-            Text(
-                "Cabang Terdekat",
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(horizontal = 16.dp)
+    // 3️⃣ Jika izin sudah granted → refine dengan lokasi GPS untuk akurasi lebih baik
+    LaunchedEffect(locationPermissionState.status) {
+        if (locationPermissionState.status.isGranted) {
+            Log.d("HOME_DEBUG", "Permission granted — refine dengan GPS")
+            LocationUtils.getUserLocation(
+                context = context,
+                onResult = { lat, lng ->
+                    Log.d("HOME_DEBUG", "LOCATION OK: $lat , $lng")
+                    ringkasanViewModel.getNearBranch(userLat = lat, userLng = lng)
+                },
+                onError = {
+                    Log.e("HOME_DEBUG", "GPS gagal — tetap pakai data awal")
+                    // data dari getNearBranchWithoutLocation() sudah ada, tidak perlu action
+                }
             )
-
-            Spacer(Modifier.height(8.dp))
-
-            BranchCarousel(branches)
         }
     }
-}
 
-@Composable
-fun BranchCarousel(branches: List<Branch>) {
-
-    val listState = rememberLazyListState()
-
-    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
-
-    LazyRow(
-        state = listState,
-        flingBehavior = flingBehavior,
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-    ) {
-
-        itemsIndexed(branches) { _, branch ->
-            BranchCard(branch)
-        }
-    }
-}
-
-@Composable
-fun BranchCard(branch: Branch) {
-    Box(
-        modifier = Modifier
-            .width(260.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .fillMaxSize()
             .background(Color.White)
-            .padding(14.dp)
     ) {
+
+        item {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+
+                HeaderSection(profile)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (loading) {
+
+
+                } else {
+
+                    AnimatedVisibility(
+                        visible = showQueueCard,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+
+                        nearestCabang?.let {
+                            CurrentQueueCard(it)
+                        }
+                    }
+                }
+
+                AnimatedVisibility(
+                    visible = showQueueCard,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                PromoBanner()
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                MenuGrid(navHostController)
+            }
+        }
+    }
+}
+
+@Composable
+fun HeaderSection(user: UserData?) {
+
+    val greeting = greetingState().value
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+
         Column {
 
             Text(
-                branch.name,
+                text = "Halo, ${user?.name ?: ""}",
                 fontWeight = FontWeight.Bold,
-                maxLines = 1
+                fontSize = 20.sp
             )
 
-            Spacer(Modifier.height(6.dp))
-
-            Text("📍 ${branch.distance}")
-
-            Spacer(Modifier.height(10.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                InfoBoxSmall("Antrian", branch.queue)
-                InfoBoxSmall("Estimasi", branch.estimate)
-            }
+            Text(
+                text = greeting,
+                color = Color.Gray
+            )
         }
-    }
-}
 
-@SuppressLint("Lifecycle")
-@Composable
-fun MapboxView(location: Point) {
-
-    val context = LocalContext.current
-    val mapView = remember { MapView(context) }
-
-    // 🔥 Update camera saat location berubah
-    LaunchedEffect(location) {
-        mapView.mapboxMap.setCamera(
-            CameraOptions.Builder()
-                .center(location)
-                .zoom(14.5)
-                .build()
+        AsyncImage(
+            model = user?.avatar_url,
+            contentDescription = null,
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
         )
     }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            mapView.onStop()
-            mapView.onDestroy()
-        }
-    }
-
-    AndroidView(
-        factory = {
-            mapView.apply {
-                mapboxMap.loadStyle(Style.MAPBOX_STREETS)
-            }
-        },
-        modifier = Modifier.fillMaxSize()
-    )
 }
 
 @Composable
-fun InfoBoxSmall(title: String, value: String) {
-    Column(
-        modifier = Modifier
-            .background(Color(0xFFF1F1F1), RoundedCornerShape(10.dp))
-            .padding(horizontal = 10.dp, vertical = 8.dp)
+fun CurrentQueueCard(
+    cabang: RingkasanCabangItem
+) {
+
+    // Tentukan teks nomor antrian yang dipanggil
+    val nomorText = when {
+        cabang.nomorDipanggil != null && cabang.nomorDipanggil != 0 -> "A${cabang.nomorDipanggil}"
+        cabang.sisaAntrian > 0 -> "-"
+        else -> "-"
+    }
+
+    // Progress bar dinamis — estimasi maks 30 antrian per hari
+    val progress = when {
+        cabang.sisaAntrian <= 0 -> 1f
+        else -> (1f - (cabang.sisaAntrian.toFloat() / 30f)).coerceIn(0f, 1f)
+    }
+
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Text(title, color = Color.Gray)
-        Text(value, fontWeight = FontWeight.Bold)
+
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Text(
+                    text = "ANTRIAN HARI INI",
+                    color = Color.Black,
+                    fontSize = 12.sp
+                )
+
+                Text(
+                    text = cabang.namaCabang,
+                    fontSize = 12.sp,
+                    color = Color.White,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .width(80.dp)
+                        .background(
+                            Color(0xFFFF7A00),
+                            RoundedCornerShape(20)
+                        )
+                        .padding(
+                            horizontal = 12.dp,
+                            vertical = 4.dp
+                        )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = nomorText,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFF1C1F4A)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Text(
+                    text = "Estimasi: ${cabang.estimasiJam.ifBlank { "-" }}",
+                    color = Color.Gray,
+                    fontSize = 14.sp
+                )
+
+                Text(
+                    text = "${cabang.sisaAntrian} Antrian lagi",
+                    fontSize = 14.sp
+                )
+            }
+        }
     }
 }
+
+@Composable
+fun PromoBanner() {
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                brush = Brush.horizontalGradient(
+                    listOf(
+                        Color(0xFF1C1F4A),
+                        Color(0xFF2E3A87)
+                    )
+                )
+            )
+    ) {
+
+        Image(
+            painter = painterResource(id = R.drawable.img_promo),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds,
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Bottom
+        ) {
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(Color.White.copy(alpha = 0.15f))
+                    .clickable { }
+                    .padding(
+                        horizontal = 12.dp,
+                        vertical = 6.dp
+                    )
+            ) {
+
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+
+                Spacer(modifier = Modifier.width(6.dp))
+
+                Text(
+                    text = "Lihat Detail",
+                    color = Color.White,
+                    fontSize = 12.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MenuGrid(navController: NavController) {
+
+    val menus = listOf(
+        "Cabang Terdekat",
+        "Ambil Antrian",
+        "Riwayat",
+        "Pengingat"
+    )
+
+    val route = listOf(
+        Screen.DaftarCabang.route,
+        Screen.AmbilAntreanFromBeranda.route,
+        Screen.Riyawat.route,
+        Screen.Pengingat.route
+    )
+
+    val icons = listOf(
+        R.drawable.ic_maps,
+        R.drawable.ic_que,
+        R.drawable.ic_history,
+        R.drawable.ic_clock
+    )
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+
+        for (row in 0 until 2) {
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                for (col in 0 until 2) {
+
+                    val index = row * 2 + col
+
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(120.dp)
+                            ,
+                        elevation = CardDefaults.cardElevation(2.dp)
+                    ) {
+
+                        Column(
+                            modifier = Modifier.fillMaxSize().clickable {
+                                navController.navigate(route[index])
+                            },
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(CircleShape)
+                                    .background(PrimBlue)
+                            ) {
+
+                                Icon(
+                                    painter = painterResource(id = icons[index]),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = Color.White
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = menus[index],
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun getGreeting(): String {
+
+    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+
+    return when (hour) {
+        in 5..10 -> "Selamat Pagi ☀️"
+        in 11..14 -> "Selamat Siang 🌤️"
+        in 15..17 -> "Selamat Sore 🌇"
+        else -> "Selamat Malam 🌙"
+    }
+}
+
+@Composable
+fun greetingState(): State<String> {
+
+    val greeting = remember {
+        mutableStateOf(getGreeting())
+    }
+
+    LaunchedEffect(Unit) {
+
+        while (true) {
+
+            greeting.value = getGreeting()
+
+            kotlinx.coroutines.delay(60_000)
+        }
+    }
+
+    return greeting
+}
+
+

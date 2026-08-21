@@ -1,19 +1,29 @@
-package dev.inteiintel.teduhqueuesapp.ui.main
+package dev.inteiintel.teduhserviceapp.presentation.main
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -38,17 +49,38 @@ import dev.inteiintel.teduhserviceapp.presentation.auth.AuthViewModel
 import dev.inteiintel.teduhserviceapp.presentation.main.home.HomeScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.notifications.NotificationsScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.queues.QueuesScreen
-import dev.inteiintel.teduhserviceapp.presentation.main.settings.SettingsScreen
+import dev.inteiintel.teduhserviceapp.presentation.main.profile.ProfileScreen
 import dev.inteiintel.teduhserviceapp.ui.theme.DarkOrange
+import dev.inteiintel.teduhserviceapp.ui.theme.DimGray
 import dev.inteiintel.teduhserviceapp.ui.theme.GhostWhite
+import dev.inteiintel.teduhserviceapp.ui.theme.PrimBlue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
+/**
+ * Shell utama aplikasi setelah login berhasil.
+ *
+ * Menampilkan [BottomBar] dan mengatur navigasi internal antar tab:
+ * - [HomeScreen] — beranda dengan ringkasan dan aksi utama.
+ * - [QueuesScreen] — daftar antrian aktif pengguna.
+ * - [NotificationsScreen] — broadcast notifikasi dari bengkel.
+ * - [ProfileScreen] — profil dan pengaturan akun.
+ *
+ * Juga mengawasi refresh token secara reaktif: jika token dihapus (logout),
+ * pengguna otomatis diarahkan kembali ke [Screen.Auth].
+ *
+ * @param viewModel ViewModel autentikasi untuk cek sesi aktif.
+ * @param rootNavController Controller navigasi root (dari [AppNavGraph]) untuk navigasi lintas-alur.
+ *
+ * @see dev.inteiintel.teduhserviceapp.utils.navigation.AppNavGraph
+ * @see AuthViewModel
+ */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(
     viewModel: AuthViewModel = viewModel(),
-    navController: NavController
+    rootNavController: NavController
 ) {
     val context = LocalContext.current
 
@@ -57,7 +89,7 @@ fun MainScreen(
     LaunchedEffect(Unit) {
         viewModel.getCurrentRefreshToken(context).collect { token ->
             if (token.isEmpty()) {
-                navController.navigate(Screen.Auth.route) {
+                rootNavController.navigate(Screen.Auth.route) {
                     popUpTo(Screen.Main.route) {
                         inclusive = true
                     }
@@ -68,19 +100,19 @@ fun MainScreen(
 
     Scaffold(
         bottomBar = {
-            CustomBottomBar(bottomNavController)
+            BottomBar(bottomNavController)
         }
     ) { padding ->
 
         NavHost(
             navController = bottomNavController,
-            startDestination = "home",
+            startDestination = Screen.Home.route,
             modifier = Modifier.padding(padding)
         ) {
-            composable("home") { HomeScreen() }
-            composable("queues") { QueuesScreen() }
-            composable("notif") { NotificationsScreen() }
-            composable("settings") { SettingsScreen(navController = navController) }
+            composable(Screen.Home.route) { HomeScreen(navHostController = rootNavController as NavHostController) }
+            composable(Screen.Queues.route) { QueuesScreen(navController = rootNavController) }
+            composable(Screen.Notifications.route) { NotificationsScreen(navController = rootNavController) }
+            composable(Screen.Settings.route) { ProfileScreen(navController = bottomNavController, toDetail = rootNavController) }
         }
     }
 }
@@ -88,12 +120,10 @@ fun MainScreen(
 @Composable
 fun LogoutButtonTest(scope: CoroutineScope, viewModel: AuthViewModel, context: Context, navController: NavController ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("HALAMANA UTAMA")
-
         Button(onClick = {
             scope.launch {
                 viewModel.deleteToken(context)
@@ -115,14 +145,24 @@ fun LogoutButtonTest(scope: CoroutineScope, viewModel: AuthViewModel, context: C
 
 
 
+/**
+ * Bottom navigation bar alternatif berbasis icon kustom dari drawable resource.
+ *
+ * Setiap item menggunakan ikon dari `res/drawable`. Tab aktif ditandai dengan
+ * background [DarkOrange] dan ikon putih.
+ *
+ * @param navController Controller navigasi untuk bottom tab.
+ *
+ * @see BottomBar
+ */
 @Composable
 fun CustomBottomBar(navController: NavController) {
 
     val items = listOf(
-        "home" to R.drawable.ic_home,
-        "queues" to R.drawable.ic_queue,
-        "notif" to R.drawable.ic_bell,
-        "settings" to R.drawable.ic_settings
+        Screen.Home.route to R.drawable.ic_home,
+        Screen.Queues.route to R.drawable.ic_queue,
+        Screen.Notifications.route to R.drawable.ic_bell,
+        Screen.Settings.route to R.drawable.ic_settings
     )
 
     val currentRoute =
@@ -171,6 +211,68 @@ fun CustomBottomBar(navController: NavController) {
                         modifier = Modifier.size(24.dp)
                     )
                 }
+            }
+        }
+    }
+}
+
+
+/**
+ * Bottom navigation bar utama aplikasi berbasis Material3 [NavigationBar].
+ *
+ * Menampilkan 4 tab (Beranda, Antrian, Notifikasi, Profil) dengan indikator warna [PrimBlue]
+ * untuk tab yang aktif. Navigasi menggunakan `launchSingleTop` dan `restoreState` untuk
+ * menjaga state antar tab.
+ *
+ * @param navController Controller navigasi internal bottom tab.
+ */
+@Composable
+fun BottomBar(navController: NavHostController) {
+
+    val items = listOf(
+        Screen.Home.route to Icons.Default.Home,
+        Screen.Queues.route to Icons.AutoMirrored.Filled.List,
+        Screen.Notifications.route to Icons.Default.Notifications,
+        Screen.Settings.route to Icons.Default.Person
+    )
+    Column {
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = DimGray
+        )
+        NavigationBar(containerColor = Color(0xFFFFFFFF)) {
+            val currentRoute =
+                navController.currentBackStackEntryAsState().value?.destination?.route
+
+            items.forEach { (route, icon) ->
+
+                NavigationBarItem(
+                    selected = currentRoute == route,
+                    onClick = {
+                        navController.navigate(route) {
+
+                            popUpTo(Screen.Home.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = Color.Transparent,
+                        selectedIconColor = PrimBlue,
+                        selectedTextColor = PrimBlue,
+                        unselectedIconColor = DimGray.copy(alpha = 0.6f),
+                        unselectedTextColor = DimGray.copy(alpha = 0.6f)
+                    ),
+                    icon = {
+                        Icon(icon, contentDescription = route)
+                    },
+                    label = {
+                        Text(route.replaceFirstChar { it.uppercase() })
+                    }
+                )
             }
         }
     }
