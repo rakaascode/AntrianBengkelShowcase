@@ -388,7 +388,7 @@ fun PreviewPilihEstimasiScreen() {
         request = CreateAntrianRequest(
             cabang_id = 0,
             nama_pemilik = "Raka Agi Saputra",
-            no_hp = "BE 2879 FL",
+            no_polisi = "BE 2879 FL",
             merk_motor = "Yamaha",
             tipe_motor = "Mio M3",
             no_rangka = "MH35SG123456",

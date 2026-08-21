@@ -465,7 +465,7 @@ fun PreviewKonfirmasiAntreanScreen() {
     val dummyRequest = CreateAntrianRequest(
         cabang_id = 1,
         nama_pemilik = "Raka",
-        no_hp = "08123",
+        no_polisi = "BE 2879 FL",
         merk_motor = "Yamaha",
         tipe_motor = "Mio M3",
         no_rangka = "123",
