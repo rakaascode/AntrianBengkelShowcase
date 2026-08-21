@@ -117,21 +117,20 @@ fun NotificationsScreen(
             .fillMaxSize()
             .background(Color(0xFFF0F3FB))
     ) {
-        // ─── Header ─────────────────────────────────────────────────────────
-        // Rule 1 – Visibility of System Status: unread count selalu terlihat di header
+        // ─── Header Modern Startup ──────────────────────────────────────────
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF0A1547),
-                            Color(0xFF122180),
-                            Color(0xFF1E35C0)
+                            Color(0xFF0F1A65),
+                            Color(0xFF1B2B8E),
+                            Color(0xFF263DB5)
                         )
                     )
                 )
-                .padding(top = 32.dp, bottom = 24.dp, start = 20.dp, end = 20.dp)
+                .padding(top = 26.dp, bottom = 22.dp, start = 20.dp, end = 20.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
@@ -140,56 +139,54 @@ fun NotificationsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        // Badge di atas judul supaya user langsung tahu ada pesan baru
-                        if (unreadCount > 0) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(Color(0xFFFF3B30).copy(alpha = 0.18f))
-                                    .padding(horizontal = 10.dp, vertical = 3.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "${if (unreadCount > 99) "99+" else unreadCount} pesan baru",
-                                    fontSize = 10.sp,
-                                    color = Color(0xFFFF8A80),
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 0.3.sp
-                                )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Pusat Notifikasi",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp,
+                                color = Color.White
+                            )
+
+                            if (unreadCount > 0) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color(0xFFFF3B30))
+                                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = if (unreadCount > 99) "99+ baru" else "$unreadCount baru",
+                                        fontSize = 10.sp,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
-                            Spacer(modifier = Modifier.height(6.dp))
                         }
 
-                        Text(
-                            text = "Pusat Notifikasi",
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 22.sp,
-                            color = Color.White,
-                            letterSpacing = (-0.3).sp
-                        )
-
-                        Spacer(modifier = Modifier.height(3.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
 
                         Text(
-                            text = "Promo & info antrean servis Anda",
+                            text = "Info terkini promo & antrean servis motor Anda",
                             fontSize = 12.sp,
-                            color = Color.White.copy(alpha = 0.65f),
-                            letterSpacing = 0.1.sp
+                            color = Color.White.copy(alpha = 0.8f)
                         )
                     }
 
                     Box(
                         modifier = Modifier
-                            .size(46.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.12f)),
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Campaign,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
