@@ -20,7 +20,7 @@ fun SavedAntrianEntity.toRequest(): CreateAntrianRequest {
     return CreateAntrianRequest(
         cabang_id = cabang_id,
         nama_pemilik = nama_pemilik,
-        no_hp = no_hp,
+        no_polisi = no_polisi,
         merk_motor = merk_motor,
         tipe_motor = tipe_motor,
         no_rangka = no_rangka,

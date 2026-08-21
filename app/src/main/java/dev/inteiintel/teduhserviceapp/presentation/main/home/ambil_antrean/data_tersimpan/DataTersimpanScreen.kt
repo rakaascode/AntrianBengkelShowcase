@@ -145,7 +145,7 @@ fun PilihDataKendaraanScreen(
 
                     CardDataKendaraanTersimpan(
                         namaPemilik = kendaraan.nama_pemilik,
-                        nomorPolisi = kendaraan.no_hp,
+                        nomorPolisi = kendaraan.no_polisi,
                         merkType = kendaraan.merk_motor,
                         onClick = {
                             onPilihKendaraan(kendaraan)

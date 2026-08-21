@@ -22,7 +22,7 @@ data class SavedAntrianEntity(
     val id: Int = 0,
     val cabang_id: Int,
     val nama_pemilik: String,
-    val no_hp: String,
+    val no_polisi: String,
     val merk_motor: String,
     val tipe_motor: String,
     val no_rangka: String,

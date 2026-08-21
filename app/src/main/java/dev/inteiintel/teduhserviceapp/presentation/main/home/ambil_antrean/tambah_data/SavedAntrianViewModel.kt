@@ -22,7 +22,7 @@ class SavedAntrianViewModel @Inject constructor(
             val entity = SavedAntrianEntity(
                 cabang_id = request.cabang_id,
                 nama_pemilik = request.nama_pemilik,
-                no_hp = request.no_hp,
+                no_polisi = request.no_polisi,
                 merk_motor = request.merk_motor,
                 tipe_motor = request.tipe_motor,
                 no_rangka = request.no_rangka,

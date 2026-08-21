@@ -337,7 +337,7 @@ fun AppNavGraph() {
                         namaCabang = selectedCabang.nama,
                         alamatCabang = selectedCabang.alamat,
                         namaPemilik = finalRequest.nama_pemilik,
-                        nomorPolisi = finalRequest.no_hp,
+                        nomorPolisi = finalRequest.no_polisi,
                         merkType = "${finalRequest.merk_motor} ${finalRequest.tipe_motor}"
                     )
 
@@ -404,7 +404,7 @@ fun AppNavGraph() {
                         queueNumber = data.data.nomor_antrian.toString(),
                         estDate = "${getDateOnly(data.data.tanggal_kedatangan)} - ${data.data.estimasi_jam}",
 
-                        vehicle = "${data.data.no_hp} - ${data.data.merk_motor} ${data.data.tipe_motor}",
+                        vehicle = "${data.data.no_polisi} - ${data.data.merk_motor} ${data.data.tipe_motor}",
 
                         branch = selectedCabang?.nama ?: "Cabang tidak ditemukan",
 

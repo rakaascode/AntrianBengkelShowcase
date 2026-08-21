@@ -346,7 +346,7 @@ fun RingkasanKendaraanCard(request: CreateAntrianRequest) {
                 color = Color(0xFFF0F0F0)
             )
 
-            InfoRowEstimasi(label = "No. Polisi", value = request.no_hp)
+            InfoRowEstimasi(label = "No. Polisi", value = request.no_polisi)
             Spacer(modifier = Modifier.height(6.dp))
             InfoRowEstimasi(label = "No. Rangka", value = request.no_rangka)
             Spacer(modifier = Modifier.height(6.dp))
