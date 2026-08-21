@@ -12,4 +12,9 @@ import dagger.hilt.android.HiltAndroidApp
  * @see dev.inteiintel.teduhserviceapp.di.AppModule
  */
 @HiltAndroidApp
-class MyApp : Application()
+class MyApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        dev.inteiintel.teduhserviceapp.utils.NotificationHelper.createNotificationChannels(this)
+    }
+}

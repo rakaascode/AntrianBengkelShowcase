@@ -43,11 +43,17 @@ class MainActivity : ComponentActivity() {
                 setKeepOnScreenCondition { splashScreenViewModel.isSplashScreenVisible.value }
             }
 
-        super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // Android 12+
             window.statusBarColor = Color.WHITE
-
         }
+
+        // Request runtime permission for notifications on Android 13+ (API 33)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
+            }
+        }
+
         splashScreenViewModel.checkLogin(this)
         setContent {
             TeduhServiceAppTheme {
