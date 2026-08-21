@@ -36,9 +36,26 @@ class QueusViewModel @Inject constructor(
     private val _loadingCancel = MutableStateFlow(false)
     val loadingCancel = _loadingCancel.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
     init {
         viewModelScope.launch {
             getAntreanActive()
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val startTime = System.currentTimeMillis()
+            getAntreanActive()
+            val elapsed = System.currentTimeMillis() - startTime
+            val minDelay = 650L
+            if (elapsed < minDelay) {
+                kotlinx.coroutines.delay(minDelay - elapsed)
+            }
+            _isRefreshing.value = false
         }
     }
 
