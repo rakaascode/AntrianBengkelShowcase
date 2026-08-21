@@ -37,11 +37,10 @@ class MainActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+        val splashScreen = installSplashScreen()
+        super.onCreate(savedInstanceState)
 
-            installSplashScreen().apply {
-                setKeepOnScreenCondition { splashScreenViewModel.isSplashScreenVisible.value }
-            }
+        splashScreen.setKeepOnScreenCondition { splashScreenViewModel.isSplashScreenVisible.value }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // Android 12+
             window.statusBarColor = Color.WHITE
