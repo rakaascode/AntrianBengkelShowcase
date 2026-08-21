@@ -9,7 +9,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,9 +30,11 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +42,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -218,61 +227,111 @@ fun CustomBottomBar(navController: NavController) {
 
 
 /**
- * Bottom navigation bar utama aplikasi berbasis Material3 [NavigationBar].
+ * Bottom navigation bar modern bergaya startup (Floating Pill Dock).
  *
- * Menampilkan 4 tab (Beranda, Antrian, Notifikasi, Profil) dengan indikator warna [PrimBlue]
- * untuk tab yang aktif. Navigasi menggunakan `launchSingleTop` dan `restoreState` untuk
- * menjaga state antar tab.
+ * Menggunakan floating container dengan sudut membulat, soft shadow,
+ * dynamic animated active pill indicator, subtle haptic feel, dan label yang sleek.
  *
  * @param navController Controller navigasi internal bottom tab.
  */
 @Composable
 fun BottomBar(navController: NavHostController) {
+    data class NavItem(
+        val route: String,
+        val label: String,
+        val icon: androidx.compose.ui.graphics.vector.ImageVector
+    )
 
     val items = listOf(
-        Screen.Home.route to Icons.Default.Home,
-        Screen.Queues.route to Icons.AutoMirrored.Filled.List,
-        Screen.Notifications.route to Icons.Default.Notifications,
-        Screen.Settings.route to Icons.Default.Person
+        NavItem(Screen.Home.route, "Beranda", Icons.Default.Home),
+        NavItem(Screen.Queues.route, "Antrean", Icons.AutoMirrored.Filled.List),
+        NavItem(Screen.Notifications.route, "Notifikasi", Icons.Default.Notifications),
+        NavItem(Screen.Settings.route, "Profil", Icons.Default.Person)
     )
-    Column {
-        HorizontalDivider(
-            thickness = 1.dp,
-            color = DimGray
-        )
-        NavigationBar(containerColor = Color(0xFFFFFFFF)) {
-            val currentRoute =
-                navController.currentBackStackEntryAsState().value?.destination?.route
 
-            items.forEach { (route, icon) ->
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
-                NavigationBarItem(
-                    selected = currentRoute == route,
-                    onClick = {
-                        navController.navigate(route) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = Color.White.copy(alpha = 0.98f),
+            tonalElevation = 0.dp,
+            shadowElevation = 12.dp,
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF0F3F9)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(68.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                items.forEach { item ->
+                    val isSelected = currentRoute == item.route
 
-                            popUpTo(Screen.Home.route) {
-                                saveState = true
+                    val activeBgColor by androidx.compose.animation.animateColorAsState(
+                        targetValue = if (isSelected) Color(0xFFEFF2FF) else Color.Transparent,
+                        label = "activeBg"
+                    )
+                    val activeContentColor by androidx.compose.animation.animateColorAsState(
+                        targetValue = if (isSelected) Color(0xFF0F1A65) else Color(0xFF94A3B8),
+                        label = "activeColor"
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(activeBgColor)
+                            .clickable {
+                                if (!isSelected) {
+                                    navController.navigate(item.route) {
+                                        popUpTo(Screen.Home.route) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
                             }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
+                            .padding(vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.label,
+                                    tint = activeContentColor,
+                                    modifier = Modifier.size(if (isSelected) 22.dp else 20.dp)
+                                )
+                            }
 
-                    colors = NavigationBarItemDefaults.colors(
-                        indicatorColor = Color.Transparent,
-                        selectedIconColor = PrimBlue,
-                        selectedTextColor = PrimBlue,
-                        unselectedIconColor = DimGray.copy(alpha = 0.6f),
-                        unselectedTextColor = DimGray.copy(alpha = 0.6f)
-                    ),
-                    icon = {
-                        Icon(icon, contentDescription = route)
-                    },
-                    label = {
-                        Text(route.replaceFirstChar { it.uppercase() })
+                            Spacer(modifier = Modifier.height(3.dp))
+
+                            Text(
+                                text = item.label,
+                                fontSize = if (isSelected) 11.sp else 10.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = activeContentColor,
+                                maxLines = 1
+                            )
+                        }
                     }
-                )
+                }
             }
         }
     }
