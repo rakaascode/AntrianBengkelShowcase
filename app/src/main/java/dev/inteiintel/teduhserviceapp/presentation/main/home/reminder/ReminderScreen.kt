@@ -531,8 +531,19 @@ private fun ReminderTimingCard(enabled: Boolean) {
 
             TimingItem(
                 icon = Icons.Outlined.AccessTime,
+                title = "30 Menit Sebelum Jadwal (H-30)",
+                desc = "Pengingat otomatis via WhatsApp dikirimkan 30 menit sebelum estimasi kedatangan Anda."
+            )
+
+            HorizontalDivider(
+                color = BorderColor,
+                modifier = Modifier.padding(vertical = 12.dp)
+            )
+
+            TimingItem(
+                icon = Icons.Outlined.NotificationsActive,
                 title = "Saat Nomor Dipanggil (Urutan Terdepan)",
-                desc = "Sistem otomatis mengirim WhatsApp seketika giliran Anda tiba di loket bengkel."
+                desc = "HP akan bergetar dan membunyikan notifikasi sistem, serta dikirimkan pesan WhatsApp seketika giliran Anda tiba."
             )
 
             HorizontalDivider(
@@ -543,7 +554,7 @@ private fun ReminderTimingCard(enabled: Boolean) {
             TimingItem(
                 icon = Icons.Outlined.CheckCircleOutline,
                 title = "Saat Servis Selesai",
-                desc = "Notifikasi pemberitahuan saat kendaraan siap diambil di kasir/parkir."
+                desc = "Notifikasi pemberitahuan via WhatsApp dan aplikasi saat kendaraan siap diambil di kasir/parkir."
             )
         }
     }
@@ -618,13 +629,13 @@ private fun HowItWorksCard() {
 
             Column {
                 Text(
-                    text = "Bebas Biaya Notifikasi",
+                    text = "Layanan Pengingat Cerdas",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     color = BrandNavy
                 )
                 Text(
-                    text = "Layanan pengingat WhatsApp terhubung langsung dengan server resmi Lautan Teduh tanpa biaya tambahan.",
+                    text = "Sistem otomatis mengirim WhatsApp H-30 menit dan memicu notifikasi getar di aplikasi saat nomor Anda dipanggil di loket servis.",
                     fontSize = 11.sp,
                     color = BrandIndigo,
                     lineHeight = 15.sp
