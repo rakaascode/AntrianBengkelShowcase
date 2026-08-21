@@ -31,6 +31,32 @@ class TokenManager(private val context: Context) {
 
     private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
     private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
+    private val ONBOARDING_COMPLETED_KEY = booleanPreferencesKey("onboarding_completed")
+
+    /**
+     * Simpan status apakah onboarding sudah diselesaikan
+     */
+    suspend fun setOnboardingCompleted(completed: Boolean = true) {
+        context.tokenDataStore.edit { preferences ->
+            preferences[ONBOARDING_COMPLETED_KEY] = completed
+        }
+    }
+
+    /**
+     * Cek apakah user sudah menyelesaikan onboarding pertama kali
+     */
+    suspend fun isOnboardingCompleted(): Boolean {
+        return context.tokenDataStore.data.first()[ONBOARDING_COMPLETED_KEY] ?: false
+    }
+
+    /**
+     * Flow status onboarding
+     */
+    fun isOnboardingCompletedFlow(): Flow<Boolean> {
+        return context.tokenDataStore.data.map { preferences ->
+            preferences[ONBOARDING_COMPLETED_KEY] ?: false
+        }
+    }
 
     /**
      * Simpan access + refresh token
@@ -90,10 +116,13 @@ class TokenManager(private val context: Context) {
     }
 
     /**
-     * Hapus semua token
+     * Hapus semua token (tidak mereset status onboarding)
      */
     suspend fun clearAllToken() {
-        context.tokenDataStore.edit { it.clear() }
+        context.tokenDataStore.edit {
+            it.remove(ACCESS_TOKEN_KEY)
+            it.remove(REFRESH_TOKEN_KEY)
+        }
     }
 
     /**

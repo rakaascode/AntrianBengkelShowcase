@@ -13,7 +13,13 @@ package dev.inteiintel.teduhserviceapp.utils.navigation
  */
 sealed class Screen(val route: String) {
 
-    /** Layar autentikasi (login + onboarding). */
+    /** Layar Onboarding interaktif saat pertama kali buka aplikasi. */
+    object OnBoarding : Screen("onboarding")
+
+    /** Layar permintaan izin aplikasi (Notifikasi, Kamera, Lokasi) saat pertama kali buka. */
+    object PermissionRequest : Screen("permission_request")
+
+    /** Layar autentikasi (login Google). */
     object Auth : Screen("auth")
 
     /** Layar utama (shell dengan bottom navigation). */

@@ -49,24 +49,18 @@ import dev.inteiintel.teduhserviceapp.presentation.main.profile.edit_profile.Edi
 import dev.inteiintel.teduhserviceapp.presentation.main.queues.detail_antrean.DetailAntreanScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.queues.getDateOnly
 
+import dev.inteiintel.teduhserviceapp.presentation.onboarding.OnBoardingScreen
+import dev.inteiintel.teduhserviceapp.presentation.permission.PermissionRequestScreen
+
 /**
  * Graf navigasi utama aplikasi Teduh Service.
  *
- * Mengecek status login via [TokenManager] saat pertama kali di-compose, lalu menentukan
- * `startDestination` apakah ke [Screen.Auth] atau [Screen.Main].
+ * Mengecek status onboarding dan status login via [TokenManager] saat pertama kali di-compose,
+ * lalu menentukan `startDestination` apakah ke [Screen.OnBoarding], [Screen.Auth], atau [Screen.Main].
  *
  * Semua rute aplikasi (termasuk alur ambil antrian dan detail layar) didaftarkan di sini.
  * Data antar layar dikirim melalui `savedStateHandle` untuk menghindari serialisasi Parcelable
  * yang tidak perlu di setiap transition.
- *
- * **Alur Ambil Antrian:**
- * ```
- * TambahDataSTNK ──scan──> ScanStnk
- *                              │ (kembali dengan stnk_result)
- * TambahDataSTNK ──lanjut──> PilihCabang ──> KonfirmasiAntrean ──> BerhasilAmbilAntrean
- *
- * DataTersimpan  ──pilih──> PilihEstimasi ──> PilihCabang ──> KonfirmasiAntrean
- * ```
  *
  * @see dev.inteiintel.teduhserviceapp.utils.navigation.Screen
  * @see dev.inteiintel.teduhserviceapp.data.local.TokenManager
@@ -76,15 +70,17 @@ import dev.inteiintel.teduhserviceapp.presentation.main.queues.getDateOnly
 fun AppNavGraph() {
 
     var startDestination by remember { mutableStateOf<String?>(null) }
-    val context= LocalContext.current
-
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        val isLogin = TokenManager(context).isLoggedIn()
-        startDestination = if (isLogin) {
-            Screen.Main.route
-        } else {
-            Screen.Auth.route
+        val tokenManager = TokenManager(context)
+        val isOnboardingDone = tokenManager.isOnboardingCompleted()
+        val isLogin = tokenManager.isLoggedIn()
+
+        startDestination = when {
+            !isOnboardingDone -> Screen.OnBoarding.route
+            isLogin -> Screen.Main.route
+            else -> Screen.Auth.route
         }
     }
 
@@ -95,6 +91,12 @@ fun AppNavGraph() {
             navController = navController,
             startDestination = startDestination!!
         ) {
+            composable(Screen.OnBoarding.route) {
+                OnBoardingScreen(navController = navController)
+            }
+            composable(Screen.PermissionRequest.route) {
+                PermissionRequestScreen(navController = navController)
+            }
             composable(Screen.Auth.route) {
                 AuthLoginScreen(navController = navController)
             }
