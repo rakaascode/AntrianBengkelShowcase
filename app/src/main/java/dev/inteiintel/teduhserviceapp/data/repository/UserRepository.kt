@@ -33,4 +33,17 @@ class UserRepository(
         }
     }
 
+    suspend fun uploadAvatar(part: okhttp3.MultipartBody.Part): Result<UserData> {
+        return try {
+            val response = api.uploadAvatar(part)
+            if (response.success) {
+                Result.success(response.data)
+            } else {
+                Result.failure(Exception("Gagal mengunggah foto profil"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 }

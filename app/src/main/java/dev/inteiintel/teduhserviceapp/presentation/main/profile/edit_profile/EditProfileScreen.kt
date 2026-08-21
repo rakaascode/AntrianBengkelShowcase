@@ -56,6 +56,16 @@ fun EditProfileScreen(
     var city by remember { mutableStateOf("") }
     var province by remember { mutableStateOf("") }
     var postalCode by remember { mutableStateOf("") }
+    var selectedImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
+
+    val photoPickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.GetContent()
+    ) { uri: android.net.Uri? ->
+        uri?.let {
+            selectedImageUri = it
+            profileViewModel.uploadAvatar(context, it)
+        }
+    }
 
     // Inisialisasi state hanya saat profile pertama kali didapat / diperbarui
     LaunchedEffect(dataProfile) {
@@ -168,8 +178,7 @@ fun EditProfileScreen(
                             contentAlignment = Alignment.BottomEnd
                         ) {
 
-                            val imageUrl = dataProfile?.avatar_url ?: "https://i.pravatar.cc/300"
-
+                            val imageUrl = selectedImageUri ?: dataProfile?.avatar_url ?: "https://i.pravatar.cc/300"
 
                             AsyncImage(
                                 model = imageUrl,
@@ -182,7 +191,7 @@ fun EditProfileScreen(
 
                             Box(
                                 modifier = Modifier
-                                    .size(34.dp)
+                                    .size(36.dp)
                                     .clip(CircleShape)
                                     .background(Color.White)
                                     .border(
@@ -190,15 +199,16 @@ fun EditProfileScreen(
                                         color = Color(0xFFE5E5E5),
                                         shape = CircleShape
                                     )
-                                    .clickable { },
+                                    .clickable {
+                                        photoPickerLauncher.launch("image/*")
+                                    },
                                 contentAlignment = Alignment.Center
                             ) {
-
                                 Icon(
                                     imageVector = Icons.Outlined.CameraAlt,
                                     contentDescription = null,
                                     tint = PrimBlue,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }

@@ -49,6 +49,17 @@ interface ApiServices {
         @Body request: dev.inteiintel.teduhserviceapp.data.model.UpdateProfileRequest
     ): UserProfileResponse
 
+    /**
+     * Mengunggah file foto profil baru pengguna.
+     *
+     * @param avatar MultipartBody.Part berisi file gambar.
+     */
+    @retrofit2.http.Multipart
+    @POST("user/avatar")
+    suspend fun uploadAvatar(
+        @retrofit2.http.Part avatar: okhttp3.MultipartBody.Part
+    ): UserProfileResponse
+
     /** Mengambil daftar semua cabang bengkel yang tersedia. */
     @GET("cabang")
     suspend fun getAllBranch(): BranchResponse
