@@ -259,42 +259,18 @@ fun NotificationCard(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(
-                elevation = if (isRead) 1.dp else 4.dp,
+                elevation = if (isRead) 1.dp else 3.dp,
                 shape = RoundedCornerShape(16.dp),
-                ambientColor = config.accentColor.copy(alpha = 0.08f)
+                ambientColor = Color.Black.copy(alpha = 0.05f)
             )
             .clip(RoundedCornerShape(16.dp))
             .background(if (isRead) Color(0xFFF9FAFD) else Color.White)
             .clickable { onClick() }
     ) {
-        // Rule 1 – Visibility of Status: left accent bar hanya pada unread
-        if (!isRead) {
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(80.dp)
-                    .align(Alignment.CenterStart)
-                    .clip(RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp))
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                config.accentColor,
-                                config.accentColor.copy(alpha = 0.3f)
-                            )
-                        )
-                    )
-            )
-        }
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    start = if (isRead) 14.dp else 18.dp,
-                    end = 14.dp,
-                    top = 14.dp,
-                    bottom = 14.dp
-                ),
+                .padding(14.dp),
             verticalAlignment = Alignment.Top
         ) {
             // ── Icon Bubble ──
@@ -316,7 +292,7 @@ fun NotificationCard(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                // Badge + timestamp + unread dot
+                // Badge + timestamp + status dot
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -343,15 +319,13 @@ fun NotificationCard(
                             fontSize = 11.sp,
                             color = Color(0xFFB0B8CC)
                         )
-                        if (!isRead) {
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(7.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFFFF3B30))
-                            )
-                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .clip(CircleShape)
+                                .background(if (!isRead) Color(0xFFFF3B30) else Color(0xFFD1D5DB))
+                        )
                     }
                 }
 
