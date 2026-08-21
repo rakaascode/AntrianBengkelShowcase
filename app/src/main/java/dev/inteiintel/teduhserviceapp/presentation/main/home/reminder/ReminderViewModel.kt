@@ -25,25 +25,34 @@ class ReminderViewModel @Inject constructor(
     private val _state = MutableStateFlow<ReminderState>(ReminderState.Idle)
     val state: StateFlow<ReminderState> = _state
 
+    private val _savedWa = MutableStateFlow<String?>(null)
+    val savedWa: StateFlow<String?> = _savedWa
+
+    fun loadSavedWa() {
+        viewModelScope.launch {
+            val result = reminderRepository.getNoWa()
+            result.onSuccess { response ->
+                _savedWa.value = response?.data?.no_wa
+            }
+        }
+    }
+
     // FUNCTION KIRIM WHATSAPP
     fun sendWhatsapp(noWa: String) {
         viewModelScope.launch {
-
             _state.value = ReminderState.Loading
-
             val result = reminderRepository.simpanAtauUpdateNoWa(noWa)
-
             result.onSuccess { response ->
+                _savedWa.value = response.data.no_wa
                 _state.value = ReminderState.Success(response)
             }.onFailure { error ->
                 _state.value = ReminderState.Error(
-                    error.message ?: "Gagal mengirim WhatsApp"
+                    error.message ?: "Gagal menyimpan nomor WhatsApp"
                 )
             }
         }
     }
 
-    // OPTIONAL: reset state (biar gak stuck di success/error)
     fun resetState() {
         _state.value = ReminderState.Idle
     }

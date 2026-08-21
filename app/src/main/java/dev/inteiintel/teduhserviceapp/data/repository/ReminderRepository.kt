@@ -10,6 +10,22 @@ class ReminderRepository @Inject constructor(
 ) {
 
     /**
+     * Mengambil nomor WhatsApp user yang tersimpan di server.
+     */
+    suspend fun getNoWa(): Result<ReminderModelsResponse?> {
+        return try {
+            val response = apiService.getNoWa()
+            if (response.isSuccessful && response.body()?.success == true) {
+                Result.success(response.body())
+            } else {
+                Result.success(null)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Menyimpan atau memperbarui nomor WhatsApp pengguna.
      *
      * Jika nomor WA belum ada → POST /users/kontak (simpan pertama kali).
