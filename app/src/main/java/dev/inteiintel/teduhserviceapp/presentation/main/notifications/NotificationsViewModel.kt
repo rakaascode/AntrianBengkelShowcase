@@ -1,11 +1,14 @@
 package dev.inteiintel.teduhserviceapp.presentation.main.notifications
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.inteiintel.teduhserviceapp.data.model.NotificationData
 import dev.inteiintel.teduhserviceapp.data.repository.NotificationsRepository
+import dev.inteiintel.teduhserviceapp.utils.NotificationHelper
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
-    private val notificationsRepository: NotificationsRepository
+    private val notificationsRepository: NotificationsRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _notificationsData = MutableStateFlow<List<NotificationData>>(emptyList())
@@ -65,6 +69,8 @@ class NotificationsViewModel @Inject constructor(
             val result = notificationsRepository.getAllNotifications()
 
             result.onSuccess { newList ->
+                val prevIds = _notificationsData.value.map { it.id }.toSet()
+
                 // Pertahankan status isRead lokal supaya tidak reset saat polling
                 val currentReadIds = _notificationsData.value
                     .filter { it.isRead }
@@ -73,6 +79,19 @@ class NotificationsViewModel @Inject constructor(
 
                 _notificationsData.value = newList.map { item ->
                     if (item.id in currentReadIds) item.copy(isRead = true) else item
+                }
+
+                // Notifikasi sistem untuk item broadcast baru yang belum pernah diterima di sesi ini
+                if (prevIds.isNotEmpty()) {
+                    val newItems = newList.filter { it.id !in prevIds && !it.isRead }
+                    for (item in newItems) {
+                        NotificationHelper.showPromoNotification(
+                            context = context,
+                            notificationId = item.id,
+                            title = item.judul ?: "Pemberitahuan Bengkel",
+                            message = item.deskripsi ?: ""
+                        )
+                    }
                 }
             }
 

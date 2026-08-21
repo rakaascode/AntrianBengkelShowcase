@@ -22,6 +22,8 @@ import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Motorcycle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -135,7 +137,50 @@ fun KonfirmasiAntreanScreen(
                     merkType = data.merkType,
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                if (request.reminder_aktif && !request.no_wa_reminder.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = SnowWhite),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE8F5E9))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .background(Color(0xFFE8F5E9), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Info,
+                                    contentDescription = null,
+                                    tint = Color(0xFF2E7D32),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.size(12.dp))
+                            Column {
+                                Text(
+                                    text = "Pengingat WhatsApp Aktif",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF2E7D32)
+                                )
+                                Text(
+                                    text = "Notifikasi H-30 menit & saat dipanggil dikirim ke ${request.no_wa_reminder}",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF6B7280)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // INFO BOX
                 Row(

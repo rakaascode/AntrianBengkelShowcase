@@ -34,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -70,6 +71,8 @@ fun PilihEstimasiScreen(
 ) {
     var tanggalKedatangan by remember { mutableStateOf("") }
     var jamKedatangan by remember { mutableStateOf("") }
+    var reminderAktif by remember { mutableStateOf(request.reminder_aktif) }
+    var noWaReminder by remember { mutableStateOf(request.no_wa_reminder ?: "") }
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -217,6 +220,53 @@ fun PilihEstimasiScreen(
                     focusedBorderColor = PrimBlue
                 )
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ─── Pengingat WhatsApp ───────────────────────────────────────────
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = SnowWhite),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Pengingat WhatsApp (H-30)", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = DarkSlate)
+                            Text(
+                                "Kirim notifikasi otomatis H-30 menit dan saat nomor dipanggil ke WhatsApp Anda.",
+                                fontSize = 12.sp,
+                                color = Color(0xFF6B7280)
+                            )
+                        }
+                        Switch(
+                            checked = reminderAktif,
+                            onCheckedChange = { reminderAktif = it }
+                        )
+                    }
+
+                    if (reminderAktif) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        OutlinedTextField(
+                            value = noWaReminder,
+                            onValueChange = { noWaReminder = it },
+                            label = { Text("Nomor WhatsApp Penerima", fontSize = 12.sp) },
+                            placeholder = { Text("Contoh: 081234567890", fontSize = 12.sp) },
+                            singleLine = true,
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimBlue,
+                                unfocusedBorderColor = Color(0xFFE0E0E0)
+                            )
+                        )
+                    }
+                }
+            }
         }
 
         // ─── Bottom Button ────────────────────────────────────────────────────
@@ -230,11 +280,13 @@ fun PilihEstimasiScreen(
                 onClick = {
                     val finalRequest = request.copy(
                         tanggal_kedatangan = convertToIsoDateEstimasi(tanggalKedatangan),
-                        estimasi_jam = jamKedatangan
+                        estimasi_jam = jamKedatangan,
+                        reminder_aktif = reminderAktif,
+                        no_wa_reminder = if (reminderAktif) noWaReminder.trim() else ""
                     )
                     onLanjutClick(finalRequest)
                 },
-                enabled = isFormValid,
+                enabled = isFormValid && (!reminderAktif || noWaReminder.isNotBlank()),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),

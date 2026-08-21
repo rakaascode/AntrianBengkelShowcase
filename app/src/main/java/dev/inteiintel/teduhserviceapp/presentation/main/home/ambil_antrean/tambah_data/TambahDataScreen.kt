@@ -87,6 +87,8 @@ fun TambahDataScreen(
     var noMesin by remember { mutableStateOf("") }
 
     var saveToLocal by remember { mutableStateOf(false) }
+    var reminderAktif by remember { mutableStateOf(true) }
+    var noWaReminder by remember { mutableStateOf("") }
 
     var tanggalKedatangan by remember { mutableStateOf("") }
     var jamKedatangan by remember { mutableStateOf("") }
@@ -198,6 +200,54 @@ fun TambahDataScreen(
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
             item { SaveSwitchCard(checked = saveToLocal, onCheckedChange = {saveToLocal = it }) }
+
+            item { Spacer(modifier = Modifier.height(12.dp)) }
+
+            item {
+                Card(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Pengingat WhatsApp (H-30)", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                                Text(
+                                    "Kirim notifikasi otomatis H-30 menit dan saat nomor dipanggil ke WhatsApp Anda.",
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                            Switch(
+                                checked = reminderAktif,
+                                onCheckedChange = { reminderAktif = it }
+                            )
+                        }
+
+                        if (reminderAktif) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            OutlinedTextField(
+                                value = noWaReminder,
+                                onValueChange = { noWaReminder = it },
+                                label = { Text("Nomor WhatsApp Penerima") },
+                                placeholder = { Text("Contoh: 081234567890") },
+                                singleLine = true,
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFF1E2A5A),
+                                    unfocusedBorderColor = Color.LightGray
+                                )
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         Column(
@@ -222,8 +272,8 @@ fun TambahDataScreen(
                         tanggal_kedatangan = convertToIsoDate(tanggalKedatangan),
                         estimasi_jam = jamKedatangan,
                         catatan = "",
-                        reminder_aktif = false,
-                        no_wa_reminder = ""
+                        reminder_aktif = reminderAktif,
+                        no_wa_reminder = if (reminderAktif) noWaReminder.trim() else ""
                     )
 
                     if(saveToLocal){
@@ -232,7 +282,7 @@ fun TambahDataScreen(
 
                     onNextScreenClick(dataReq)
                 },
-                enabled = isFormValid,
+                enabled = isFormValid && (!reminderAktif || noWaReminder.isNotBlank()),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
