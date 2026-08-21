@@ -54,13 +54,14 @@ class NotificationsViewModel @Inject constructor(
     /** Trigger refresh manual */
     fun refresh() {
         viewModelScope.launch {
-            loadAllNotifications()
+            loadAllNotifications(isManualRefresh = true)
         }
     }
 
-    private suspend fun loadAllNotifications() {
+    private suspend fun loadAllNotifications(isManualRefresh: Boolean = false) {
         try {
             _isLoading.value = true
+            val startTime = System.currentTimeMillis()
             val result = notificationsRepository.getAllNotifications()
 
             result.onSuccess { newList ->
@@ -77,6 +78,15 @@ class NotificationsViewModel @Inject constructor(
 
             result.onFailure { error ->
                 Log.e("NotificationsVM", "Load gagal: ${error.message}")
+            }
+
+            // Jika dipanggil via refresh manual, beri waktu berputar minimal 700ms agar animasi spinner terlihat jelas & smooth
+            if (isManualRefresh) {
+                val elapsed = System.currentTimeMillis() - startTime
+                val minDelay = 700L
+                if (elapsed < minDelay) {
+                    delay(minDelay - elapsed)
+                }
             }
 
         } catch (e: Exception) {
