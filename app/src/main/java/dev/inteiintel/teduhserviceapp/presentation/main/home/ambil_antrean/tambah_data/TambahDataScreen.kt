@@ -213,7 +213,7 @@ fun TambahDataScreen(
                     val dataReq = CreateAntrianRequest(
                         cabang_id = 0,
                         nama_pemilik = namaLengkap,
-                        no_hp = noPolisi,      // API masih pakai no_hp untuk nomor polisi
+                        no_polisi = noPolisi,
                         merk_motor = merkMotor.ifBlank { "Yamaha" },
                         tipe_motor = tipeMotor,
                         no_rangka = noRangka,

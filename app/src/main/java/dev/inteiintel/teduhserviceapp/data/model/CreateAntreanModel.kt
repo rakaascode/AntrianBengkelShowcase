@@ -19,7 +19,7 @@ data class AntrianData(
     val nomor_antrian: Int,
     val status: String,
     val nama_pemilik: String,
-    val no_hp: String,
+    val no_polisi: String,
     val merk_motor: String,
     val tipe_motor: String,
     val no_rangka: String,
@@ -37,7 +37,7 @@ data class AntrianData(
 data class CreateAntrianRequest(
     val cabang_id: Int,
     val nama_pemilik: String,
-    val no_hp: String,
+    val no_polisi: String,
     val merk_motor: String,
     val tipe_motor: String,
     val no_rangka: String,
@@ -66,7 +66,7 @@ data class Antrian(
 @Parcelize
 data class AntrianFormData(
     val nama_pemilik: String,
-    val no_hp: String,
+    val no_polisi: String,
     val merk_motor: String,
     val tipe_motor: String,
     val no_rangka: String,

@@ -238,9 +238,9 @@ fun DetailAntreanScreen(
                         )
 
                         DetailItemRow(
-                            icon = Icons.Outlined.Phone,
-                            label = "No. Telepon",
-                            value = data.no_hp
+                            icon = Icons.Outlined.ConfirmationNumber,
+                            label = "No. Polisi",
+                            value = data.no_polisi
                         )
 
                         DetailItemRow(
