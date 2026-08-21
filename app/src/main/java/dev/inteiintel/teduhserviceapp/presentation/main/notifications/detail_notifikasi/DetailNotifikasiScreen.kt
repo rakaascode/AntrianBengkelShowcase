@@ -15,17 +15,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -42,16 +41,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import dev.inteiintel.teduhserviceapp.presentation.main.notifications.getTimeOnly
 import dev.inteiintel.teduhserviceapp.presentation.main.queues.getDateOnly
+import dev.inteiintel.teduhserviceapp.ui.theme.DarkSlate
+import dev.inteiintel.teduhserviceapp.ui.theme.DimGray
+import dev.inteiintel.teduhserviceapp.ui.theme.SnowWhite
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -73,37 +75,34 @@ fun DetailNotifikasiScreen(
             .fillMaxSize()
             .background(Color(0xFFF6F7FB))
     ) {
-        // ─── Top App Bar ─────────────────────────────────────────────────────
-        // Rule 3 – User Control & Freedom: tombol back selalu jelas & mudah dijangkau
+        // ─── Top App Bar (original style) ───────────────────────────────────
         Box(
             modifier = Modifier
+                .background(SnowWhite)
                 .fillMaxWidth()
-                .shadow(elevation = 2.dp, ambientColor = Color.Black.copy(alpha = 0.06f))
-                .background(Color.White)
-                .padding(horizontal = 4.dp, vertical = 8.dp)
+                .padding(vertical = 10.dp, horizontal = 10.dp)
         ) {
-            // Back button (kiri)
-            IconButton(
-                onClick = { onBackClick() },
-                modifier = Modifier.align(Alignment.CenterStart)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Kembali",
-                    modifier = Modifier.size(22.dp),
-                    tint = Color(0xFF1A1C1C)
-                )
+                Text("Detail Notifikasi", fontWeight = FontWeight.Bold)
             }
 
-            // Judul (tengah)
-            Text(
-                text = "Detail Notifikasi",
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = Color(0xFF111827),
-                modifier = Modifier.align(Alignment.Center)
-            )
+            IconButton(onClick = { onBackClick() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = DarkSlate
+                )
+            }
         }
+
+        HorizontalDivider(thickness = 1.dp, color = DimGray)
 
         // ─── Content ─────────────────────────────────────────────────────────
         LazyColumn {
