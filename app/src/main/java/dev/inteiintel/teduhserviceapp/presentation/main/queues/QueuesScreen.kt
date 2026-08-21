@@ -221,7 +221,7 @@ fun QueuesScreen(
             },
             text = {
                 Text(
-                    text = "Apakah Anda yakin ingin membatalkan antrean nomor ${data.nomor_antrian}? Tindakan ini tidak dapat dibatalkan.",
+                    text = "Apakah Anda yakin ingin membatalkan antrean nomor ${data.nomor_display ?: "A-%03d".format(data.nomor_antrian)}? Tindakan ini tidak dapat dibatalkan.",
                     fontSize = 13.sp,
                     color = Color(0xFF4B5563),
                     textAlign = TextAlign.Center,
@@ -392,7 +392,7 @@ fun QueueTicketCard(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "${data.nomor_antrian}",
+                        text = data.nomor_display ?: "A-%03d".format(data.nomor_antrian),
                         fontSize = 44.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFF0F1A65),

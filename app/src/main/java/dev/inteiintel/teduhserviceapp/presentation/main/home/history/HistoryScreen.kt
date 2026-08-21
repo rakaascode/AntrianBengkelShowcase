@@ -349,7 +349,7 @@ fun HistoryCard(
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "0${item?.nomor_antrian}",
+                text = item?.nomor_display ?: "A-%03d".format(item?.nomor_antrian ?: 0),
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF151B4E)

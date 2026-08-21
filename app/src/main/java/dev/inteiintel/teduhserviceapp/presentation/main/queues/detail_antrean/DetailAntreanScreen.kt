@@ -151,7 +151,7 @@ fun DetailAntreanScreen(
                         Spacer(Modifier.height(4.dp))
 
                         Text(
-                            text = "${data.nomor_antrian}",
+                            text = data.nomor_display ?: "A-%03d".format(data.nomor_antrian),
                             fontSize = 50.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color(0xFF0F1A65),

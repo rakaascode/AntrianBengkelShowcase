@@ -401,7 +401,7 @@ fun AppNavGraph() {
                 successData?.let { data ->
 
                     SuccessQueueScreen(
-                        queueNumber = data.data.nomor_antrian.toString(),
+                        queueNumber = data.data.nomor_display ?: "A-%03d".format(data.data.nomor_antrian),
                         estDate = "${getDateOnly(data.data.tanggal_kedatangan)} - ${data.data.estimasi_jam}",
 
                         vehicle = "${data.data.no_polisi} - ${data.data.merk_motor} ${data.data.tipe_motor}",

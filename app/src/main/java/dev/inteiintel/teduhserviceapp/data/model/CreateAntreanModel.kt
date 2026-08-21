@@ -17,6 +17,7 @@ data class AntrianData(
     val cabang_id: Int,
     val user_id: Int,
     val nomor_antrian: Int,
+    val nomor_display: String? = null,
     val status: String,
     val nama_pemilik: String,
     val no_polisi: String,
@@ -53,6 +54,7 @@ data class CreateAntrianRequest(
 data class Antrian(
     val id: Int,
     val nomor_antrian: Int,
+    val nomor_display: String? = null,
     val status: String,
     val tanggal_kedatangan: String,
     val estimasi_jam: String,

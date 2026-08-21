@@ -15,6 +15,7 @@ data class AntreanActiveData(
     val cabang_id: Int,
     val user_id: Int,
     val nomor_antrian: Int,
+    val nomor_display: String? = null,
     val status: String,
     val nama_pemilik: String,
     val no_polisi: String,
