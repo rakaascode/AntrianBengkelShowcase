@@ -115,9 +115,9 @@ fun OnBoardingScreen(navController: NavController) {
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
-                            painter = painterResource(R.drawable.ic_teduh),
+                            painter = painterResource(R.drawable.ic_logo),
                             contentDescription = "Logo",
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier.size(26.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(10.dp))

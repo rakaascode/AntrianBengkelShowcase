@@ -1,36 +1,28 @@
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="40" y="40" width="944" height="944" rx="120" fill="#FFFFFF"/>
-
-  <!-- Navy rounded accents -->
-  <path d="M40 220C40 120 120 40 220 40H420C250 120 150 250 90 420L40 520V220Z" fill="#0D1B54"/>
-  <path d="M984 804C984 904 904 984 804 984H604C774 904 874 774 934 604L984 504V804Z" fill="#0D1B54"/>
-
-  <!-- Circular swoosh -->
-  <path d="M315 470C315 310 435 210 590 210C675 210 750 245 805 315" stroke="#0D1B54" stroke-width="24" stroke-linecap="round"/>
-  <path d="M725 610C660 700 560 750 445 750C350 750 275 715 220 650" stroke="#FB6B00" stroke-width="18" stroke-linecap="round"/>
-
-  <!-- LT mark -->
-  <path d="M395 350C395 330 410 315 430 315H470C490 315 505 330 505 350V540H585C605 540 620 555 620 575V595C620 615 605 630 585 630H430C410 630 395 615 395 595V350Z" fill="#0D1B54"/>
-
-  <rect x="540" y="315" width="180" height="60" rx="20" fill="#FB6B00"/>
-  <rect x="605" y="315" width="60" height="260" rx="20" fill="#FB6B00"/>
-
-  <!-- Queue people -->
-  <circle cx="760" cy="450" r="28" fill="#0D1B54"/>
-  <rect x="730" y="490" width="60" height="120" rx="28" fill="#0D1B54"/>
-
-  <circle cx="845" cy="450" r="28" fill="#0D1B54"/>
-  <rect x="815" y="490" width="60" height="120" rx="28" fill="#0D1B54"/>
-
-  <circle cx="920" cy="470" r="24" fill="#FB6B00"/>
-  <rect x="895" y="505" width="50" height="105" rx="24" fill="#FB6B00"/>
-
-  <!-- Text -->
-  <text x="230" y="790" font-family="Arial, Helvetica, sans-serif" font-size="110" font-weight="700">
-    <tspan fill="#FB6B00">L</tspan><tspan fill="#0D1B54">Teduh</tspan>
-  </text>
-
-  <line x1="240" y1="850" x2="330" y2="850" stroke="#FB6B00" stroke-width="8" stroke-linecap="round"/>
-  <text x="390" y="870" font-family="Arial, Helvetica, sans-serif" font-size="68" letter-spacing="8" fill="#0D1B54">Antrean</text>
-  <line x1="700" y1="850" x2="790" y2="850" stroke="#FB6B00" stroke-width="8" stroke-linecap="round"/>
-</svg>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="107dp"
+    android:height="107dp"
+    android:viewportWidth="107"
+    android:viewportHeight="107">
+    <group
+        android:pivotX="53.5"
+        android:pivotY="53.5"
+        android:scaleX="0.4"
+        android:scaleY="0.4">
+        <path
+            android:fillColor="#ffffff"
+            android:pathData="M53.5,53.5m-53,0a53,53 0,1 1,106 0a53,53 0,1 1,-106 0"
+            android:strokeWidth="1"
+            android:strokeColor="#0A2458" />
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M53.5,7.5C79.11,7.5 99.87,28.1 99.87,53.5C99.87,78.9 79.11,99.5 53.5,99.5C27.89,99.5 7.13,78.9 7.13,53.5C7.13,28.1 27.89,7.5 53.5,7.5Z"
+            android:strokeWidth="1"
+            android:strokeColor="#0A2458" />
+        <path
+            android:fillColor="#0A2458"
+            android:pathData="M89.96,55H17.04C41.15,64.43 50.41,71.8 54.33,91C60.12,72.31 68.07,64.55 89.96,55Z" />
+        <path
+            android:fillColor="#0A2458"
+            android:pathData="M53.03,50V17C61.22,37.59 69.13,44.51 89.96,50H53.03Z" />
+    </group>
+</vector>
