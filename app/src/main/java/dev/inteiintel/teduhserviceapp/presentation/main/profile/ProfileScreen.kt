@@ -17,12 +17,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.LockClock
+import androidx.compose.material.icons.filled.Motorcycle
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
+import kotlinx.coroutines.launch
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -73,230 +79,390 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val userProfile by profileViewModel.getProfile.collectAsState()
 
-    LazyColumn {
+    LaunchedEffect(Unit) {
+        profileViewModel.loadProfile()
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF6F8FD))
+    ) {
+        item {
+            HeroProfileHeader(user = userProfile, navController = toDetail)
+        }
+
         item {
             Column(
-                Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp)
+                    .offset(y = (-28).dp)
             ) {
+                QuickStatsCard(user = userProfile, navController = toDetail)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ServicesMenuSection(navController = toDetail)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                GeneralSettingsSection(navController = toDetail)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                HelpAndInfoSection(navController = toDetail)
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                LogoutButtonSection(
+                    onLogout = {
+                        scope.launch {
+                            authViewModel.deleteToken(context)
+                            toDetail.navigate(Screen.Auth.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(30.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun HeroProfileHeader(user: UserData?, navController: NavController) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF0F1A65),
+                        Color(0xFF1B2B8E),
+                        Color(0xFF263DB5)
+                    )
+                )
+            )
+            .padding(top = 28.dp, bottom = 48.dp, start = 20.dp, end = 20.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Akun Saya",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
 
                 Box(
                     modifier = Modifier
-                        .background(SnowWhite)
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp, horizontal = 10.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color.White.copy(alpha = 0.15f))
+                        .clickable {
+                            navController.navigate(Screen.EditProfileScreen.route)
+                        }
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text("Profile", fontWeight = FontWeight.Bold)
-                    }
+                    Text(
+                        text = "Edit Profil",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(76.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.2f))
+                        .border(2.5.dp, Color.White, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AsyncImage(
+                        model = user?.avatar_url,
+                        contentDescription = "Avatar",
+                        placeholder = painterResource(id = R.drawable.img_kantor),
+                        error = painterResource(id = R.drawable.img_kantor),
+                        modifier = Modifier
+                            .size(70.dp)
+                            .clip(CircleShape)
+                    )
                 }
 
-                HorizontalDivider(thickness = 1.dp, color = DimGray)
+                Spacer(modifier = Modifier.width(16.dp))
 
-                // Bagian yang connect ke ViewModel
-                ProfileScreenStateful(profileViewModel, toDetail)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = user?.name ?: "Pengguna Lautan Teduh",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
 
-                LogoutButtonTest(
-                    scope = scope,
-                    context = context,
-                    navController = toDetail,
-                    viewModel = authViewModel
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        text = user?.email ?: "Memuat data...",
+                        fontSize = 13.sp,
+                        color = Color.White.copy(alpha = 0.8f),
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFFF9800))
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = if (user?.role == "admin") "ADMIN CABANG" else "MEMBER RESMI",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun QuickStatsCard(user: UserData?, navController: NavController) {
+    val totalAntrean = user?.antrian?.size ?: 0
+    val antreanAktif = user?.antrian?.count { it.status.lowercase() == "menunggu" || it.status.lowercase() == "dipanggil" } ?: 0
+
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        elevation = CardDefaults.cardElevation(6.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 14.dp, horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            StatItem(
+                title = "Total Servis",
+                value = "$totalAntrean",
+                subtitle = "Riwayat",
+                onClick = { navController.navigate(Screen.Riyawat.route) }
+            )
+
+            Box(
+                modifier = Modifier
+                    .height(36.dp)
+                    .width(1.dp)
+                    .background(Color(0xFFE8EBF2))
+            )
+
+            StatItem(
+                title = "Antrean Aktif",
+                value = "$antreanAktif",
+                subtitle = "Berjalan",
+                onClick = { navController.navigate(Screen.Queues.route) }
+            )
+
+            Box(
+                modifier = Modifier
+                    .height(36.dp)
+                    .width(1.dp)
+                    .background(Color(0xFFE8EBF2))
+            )
+
+            StatItem(
+                title = "Status WA",
+                value = if (!user?.no_wa.isNullOrBlank()) "Aktif" else "Atur",
+                subtitle = "Pengingat",
+                onClick = { navController.navigate(Screen.Pengingat.route) }
+            )
+        }
+    }
+}
+
+@Composable
+fun StatItem(
+    title: String,
+    value: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = value,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF101C73)
+        )
+        Text(
+            text = title,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF5A6275)
+        )
+        Text(
+            text = subtitle,
+            fontSize = 10.sp,
+            color = Color(0xFF9EA6BA)
+        )
+    }
+}
+
+@Composable
+fun ServicesMenuSection(navController: NavController) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Text(
+                text = "Layanan & Aktivitas",
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                color = Color(0xFF141B4D)
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            ModernMenuRow(
+                icon = Icons.Default.DateRange,
+                iconBg = Color(0xFFE8EAF6),
+                iconTint = Color(0xFF3F51B5),
+                title = "Riwayat Servis Bengkel",
+                subtitle = "Lihat status servis yang telah selesai & dibatalkan",
+                onClick = { navController.navigate(Screen.Riyawat.route) }
+            )
+
+            HorizontalDivider(color = Color(0xFFF3F4F8), modifier = Modifier.padding(vertical = 4.dp))
+
+            ModernMenuRow(
+                icon = Icons.Default.LockClock,
+                iconBg = Color(0xFFE8F5E9),
+                iconTint = Color(0xFF2E7D32),
+                title = "WhatsApp Reminder",
+                subtitle = "Nomor WhatsApp aktif untuk pengingat servis",
+                onClick = { navController.navigate(Screen.Pengingat.route) }
+            )
+
+            HorizontalDivider(color = Color(0xFFF3F4F8), modifier = Modifier.padding(vertical = 4.dp))
+
+            ModernMenuRow(
+                icon = Icons.Default.Motorcycle,
+                iconBg = Color(0xFFFFF3E0),
+                iconTint = Color(0xFFE65100),
+                title = "Data Kendaraan Tersimpan",
+                subtitle = "Daftar motor dan nomor rangka STNK",
+                onClick = { navController.navigate(Screen.DataTersimpan.route) }
+            )
+        }
+    }
+}
+
+@Composable
+fun GeneralSettingsSection(navController: NavController) {
+    var notificationsEnabled by remember { mutableStateOf(true) }
+
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Text(
+                text = "Pengaturan Aplikasi",
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                color = Color(0xFF141B4D)
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0xFFEDE7F6)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = null,
+                            tint = Color(0xFF673AB7),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "Notifikasi Push",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF141B4D)
+                        )
+                        Text(
+                            text = "Info update antrean & pengumuman promo",
+                            fontSize = 11.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+                Switch(
+                    checked = notificationsEnabled,
+                    onCheckedChange = { notificationsEnabled = it }
                 )
             }
         }
     }
 }
 
-/**
- * "Stateful" wrapper: nempel ke ViewModel, ambil data, trigger load.
- * Jangan dipanggil langsung dari Preview.
- */
 @Composable
-fun ProfileScreenStateful(viewModel: ProfileViewModel, navController: NavController) {
-
-    val profileState = viewModel.getProfile.collectAsState().value
-
-    LaunchedEffect(Unit) {
-        viewModel.loadProfile()
-    }
-
-    ProfileContent(user = profileState, navController = navController)
-}
-
-/**
- * "Stateless" UI murni, cuma nerima data lewat parameter.
- * Ini yang aman dipanggil dari Preview.
- */
-@Composable
-fun ProfileContent(user: UserData?, navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
-            .padding(16.dp)
-    ) {
-        ProfileCard(user, navController = navController)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ActivitySection(navController = navController)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SettingsSection(navController = navController)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SupportAndInfoSection(navController = navController)
-    }
-}
-
-@Composable
-fun ProfileCard(user: UserData?, navController: NavController) {
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AsyncImage(
-                model = user?.avatar_url,
-                contentDescription = null,
-                placeholder = painterResource(id = R.drawable.img_kantor),
-                error = painterResource(id = R.drawable.img_kantor),
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = user?.name ?: "Pengguna",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF141B4D)
-            )
-
-            Text(
-                text = user?.email ?: "-",
-                color = Color.Gray,
-                fontSize = 14.sp
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    navController.navigate(Screen.EditProfileScreen.route)
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF101C73)
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-            ) {
-                Text("Edit Profile", fontWeight = FontWeight.SemiBold)
-            }
-        }
-    }
-}
-
-@Composable
-fun ActivitySection(navController: NavController) {
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            SectionHeader(title = "Aktivitas Layanan")
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ClickableRowItem(
-                title = "Riwayat Antrean",
-                subtitle = "Lihat status antrean selesai & batal",
-                onClick = {
-                    navController.navigate(Screen.Riyawat.route)
-                }
-            )
-
-            HorizontalDivider(color = Color(0xFFF0F0F0))
-
-            ClickableRowItem(
-                title = "Pengingat Servis",
-                subtitle = "Kelola nomor WhatsApp pengingat",
-                onClick = {
-                    navController.navigate(Screen.Pengingat.route)
-                }
-            )
-
-            HorizontalDivider(color = Color(0xFFF0F0F0))
-
-            ClickableRowItem(
-                title = "Data Kendaraan Tersimpan",
-                subtitle = "Kelola data STNK dan motor Anda",
-                onClick = {
-                    navController.navigate(Screen.DataTersimpan.route)
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun SettingsSection(navController: NavController) {
-    var notifications by remember { mutableStateOf(true) }
-
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            SectionHeader(title = "Pengaturan & Preferensi")
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            RowItem(
-                title = "Notifikasi Aplikasi",
-                trailing = {
-                    Switch(
-                        checked = notifications,
-                        onCheckedChange = { notifications = it }
-                    )
-                }
-            )
-
-            HorizontalDivider(color = Color(0xFFF0F0F0))
-
-            RowItem(
-                title = "Bahasa",
-                trailing = {
-                    Text("Indonesia", color = Color.Gray, fontSize = 14.sp)
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun SupportAndInfoSection(navController: NavController) {
+fun HelpAndInfoSection(navController: NavController) {
     val context = LocalContext.current
 
     Card(
@@ -305,24 +471,33 @@ fun SupportAndInfoSection(navController: NavController) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            SectionHeader(title = "Pusat Bantuan & Lainnya")
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ClickableRowItem(
-                title = "Daftar Cabang Bengkel",
-                subtitle = "Temukan lokasi bengkel Lautan Teduh",
-                onClick = {
-                    navController.navigate(Screen.DaftarCabang.route)
-                }
+        Column(modifier = Modifier.padding(18.dp)) {
+            Text(
+                text = "Pusat Bantuan & Info",
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                color = Color(0xFF141B4D)
             )
 
-            HorizontalDivider(color = Color(0xFFF0F0F0))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            ClickableRowItem(
+            ModernMenuRow(
+                icon = Icons.Default.Place,
+                iconBg = Color(0xFFE0F2F1),
+                iconTint = Color(0xFF00796B),
+                title = "Lokasi Bengkel & Jam Buka",
+                subtitle = "Temukan dealer & bengkel resmi terdekat",
+                onClick = { navController.navigate(Screen.DaftarCabang.route) }
+            )
+
+            HorizontalDivider(color = Color(0xFFF3F4F8), modifier = Modifier.padding(vertical = 4.dp))
+
+            ModernMenuRow(
+                icon = Icons.Default.Star,
+                iconBg = Color(0xFFFCE4EC),
+                iconTint = Color(0xFFC2185B),
                 title = "Kebijakan Privasi",
-                subtitle = "Pelajari perlindungan data Anda",
+                subtitle = "Perlindungan data & privasi pengguna",
                 onClick = {
                     val intent = android.content.Intent(
                         android.content.Intent.ACTION_VIEW,
@@ -332,90 +507,122 @@ fun SupportAndInfoSection(navController: NavController) {
                 }
             )
 
-            HorizontalDivider(color = Color(0xFFF0F0F0))
+            HorizontalDivider(color = Color(0xFFF3F4F8), modifier = Modifier.padding(vertical = 4.dp))
 
-            RowItem(
-                title = "Versi Aplikasi",
-                trailing = {
-                    Text("v1.0.0", color = Color.Gray, fontSize = 14.sp)
-                }
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Versi Aplikasi",
+                    fontSize = 13.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "v1.3 (Build 2026)",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF101C73)
+                )
+            }
         }
     }
 }
 
 @Composable
-fun SectionHeader(title: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-            color = Color(0xFF101C73)
-        )
-    }
-}
-
-@Composable
-fun ClickableRowItem(
+fun ModernMenuRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconBg: Color,
+    iconTint: Color,
     title: String,
-    subtitle: String? = null,
+    subtitle: String,
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() }
-            .padding(vertical = 12.dp),
+            .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF141B4D)
-            )
-            if (!subtitle.isNullOrBlank()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(iconBg),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column {
+                Text(
+                    text = title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF141B4D)
+                )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = subtitle,
-                    fontSize = 12.sp,
-                    color = Color.Gray
+                    fontSize = 11.sp,
+                    color = Color(0xFF8B92A4),
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
             }
         }
+
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = Color.Gray,
+            tint = Color(0xFFC0C5D3),
             modifier = Modifier.size(20.dp)
         )
     }
 }
 
 @Composable
-fun RowItem(
-    title: String,
-    trailing: @Composable () -> Unit
-) {
-    Row(
+fun LogoutButtonSection(onLogout: () -> Unit) {
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF1F1)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFD5D5)),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .clip(RoundedCornerShape(18.dp))
+            .clickable { onLogout() }
     ) {
-        Text(
-            text = title,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color(0xFF141B4D)
-        )
-        trailing()
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Keluar dari Akun",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFD32F2F)
+            )
+        }
     }
 }
 
@@ -524,25 +731,17 @@ fun PreviewProfileScreen() {
     TeduhServiceAppTheme {
         val navController = rememberNavController()
 
-        ProfileContent(
+        HeroProfileHeader(
             user = UserData(
                 id = 1,
                 name = "Budi Santoso",
                 email = "budi@example.com",
                 avatar_url = "",
-                role = "customer",
-                created_at = "2025-01-01T00:00:00Z",
+                role = "user",
+                created_at = "2026-01-01T00:00:00Z",
                 antrian = emptyList()
             ),
             navController = navController
         )
-    }
-}
-
-@ThemePreviews
-@Composable
-fun PreviewLocationCard() {
-    TeduhServiceAppTheme {
-        LocationCard()
     }
 }
