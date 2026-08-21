@@ -20,6 +20,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.DELETE
+import retrofit2.http.PUT
 
 /**
  * Interface Retrofit yang mendefinisikan seluruh endpoint REST API Teduh Service.
@@ -35,8 +36,18 @@ import retrofit2.http.DELETE
 interface ApiServices {
 
     /** Mengambil profil lengkap pengguna yang sedang login. */
-    @GET("users/profile")
+    @GET("user/profile")
     suspend fun getUserProfile(): UserProfileResponse
+
+    /**
+     * Memperbarui informasi profil pengguna.
+     *
+     * @param request Data profil baru (nama, alamat, kota, provinsi, kode pos, promo_aktif, avatar_url).
+     */
+    @PUT("user/profile")
+    suspend fun updateProfile(
+        @Body request: dev.inteiintel.teduhserviceapp.data.model.UpdateProfileRequest
+    ): UserProfileResponse
 
     /** Mengambil daftar semua cabang bengkel yang tersedia. */
     @GET("cabang")
@@ -47,11 +58,29 @@ interface ApiServices {
     suspend fun getAntreanActive(): AntreanActiveModelResponse
 
     /**
-     * Memperbarui nomor WhatsApp pengguna untuk reminder servis.
+     * Mengambil nomor WhatsApp user yang sudah tersimpan.
+     *
+     * @return Response berisi nomor WA jika ada.
+     */
+    @GET("users/kontak")
+    suspend fun getNoWa(): Response<ReminderModelsResponse>
+
+    /**
+     * Menyimpan nomor WhatsApp pengguna untuk pertama kali.
      *
      * @param request Body berisi nomor WA baru.
      */
     @POST("users/kontak")
+    suspend fun simpanNoWa(
+        @Body request: ReminderModelsRequest
+    ): ReminderModelsResponse
+
+    /**
+     * Memperbarui nomor WhatsApp pengguna yang sudah ada.
+     *
+     * @param request Body berisi nomor WA yang diperbarui.
+     */
+    @PUT("users/kontak")
     suspend fun updateNoWa(
         @Body request: ReminderModelsRequest
     ): ReminderModelsResponse

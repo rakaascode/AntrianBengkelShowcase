@@ -1,4 +1,4 @@
-package dev.inteiintel.teduhqueuesapp.ui.main
+package dev.inteiintel.teduhserviceapp.presentation.main
 
 import android.content.Context
 import android.os.Build
@@ -74,7 +74,7 @@ import kotlinx.coroutines.launch
  * @param rootNavController Controller navigasi root (dari [AppNavGraph]) untuk navigasi lintas-alur.
  *
  * @see dev.inteiintel.teduhserviceapp.utils.navigation.AppNavGraph
- * @see dev.inteiintel.teduhserviceapp.presentation.auth.AuthViewModel
+ * @see AuthViewModel
  */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

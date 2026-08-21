@@ -16,14 +16,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import dev.inteiintel.teduhqueuesapp.ui.main.MainScreen
+import dev.inteiintel.teduhserviceapp.presentation.main.MainScreen
 import dev.inteiintel.teduhserviceapp.data.local.TokenManager
 import dev.inteiintel.teduhserviceapp.data.mapper.toRequest
 import dev.inteiintel.teduhserviceapp.data.model.AntreanActiveData
 import dev.inteiintel.teduhserviceapp.data.model.Branch
 import dev.inteiintel.teduhserviceapp.data.model.CreateAntrianRequest
 import dev.inteiintel.teduhserviceapp.data.model.CreateAntrianResponse
-import dev.inteiintel.teduhserviceapp.data.model.ui.KendaraanTersimpanUiModel
 import dev.inteiintel.teduhserviceapp.data.model.ui.KonfirmasiAntreanUiModel
 import dev.inteiintel.teduhserviceapp.presentation.auth.AuthLoginScreen
 import dev.inteiintel.teduhserviceapp.presentation.main.components.ScanStnkScreen

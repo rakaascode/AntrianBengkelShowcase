@@ -9,13 +9,29 @@ class ReminderRepository @Inject constructor(
     private val apiService: ApiServices
 ) {
 
-    suspend fun sendWhatsappReminder(
+    /**
+     * Menyimpan atau memperbarui nomor WhatsApp pengguna.
+     *
+     * Jika nomor WA belum ada → POST /users/kontak (simpan pertama kali).
+     * Jika nomor WA sudah ada → PUT /users/kontak (update).
+     *
+     * @param noWa Nomor WhatsApp baru yang ingin disimpan/diperbarui.
+     */
+    suspend fun simpanAtauUpdateNoWa(
         noWa: String
     ): Result<ReminderModelsResponse> {
         return try {
-            val response = apiService.updateNoWa(
-                ReminderModelsRequest(no_wa = noWa)
-            )
+            // Cek apakah nomor WA sudah tersimpan sebelumnya
+            val existingResponse = apiService.getNoWa()
+            val sudahAda = existingResponse.isSuccessful && existingResponse.body()?.success == true
+
+            val response = if (sudahAda) {
+                // Nomor WA sudah ada → gunakan PUT untuk update
+                apiService.updateNoWa(ReminderModelsRequest(no_wa = noWa))
+            } else {
+                // Nomor WA belum ada → gunakan POST untuk simpan pertama kali
+                apiService.simpanNoWa(ReminderModelsRequest(no_wa = noWa))
+            }
 
             if (response.success) {
                 Result.success(response)

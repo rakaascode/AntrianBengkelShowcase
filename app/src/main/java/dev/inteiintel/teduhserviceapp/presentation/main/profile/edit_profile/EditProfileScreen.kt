@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import dev.inteiintel.teduhserviceapp.presentation.main.profile.ProfileUiState
 import dev.inteiintel.teduhserviceapp.presentation.main.profile.ProfileViewModel
 import dev.inteiintel.teduhserviceapp.ui.theme.DarkOrange
 import dev.inteiintel.teduhserviceapp.ui.theme.DarkSlate
@@ -38,73 +39,56 @@ val PrimBlue = Color(0xFF101C73)
 val SnowWhite = Color.White
 
 @Composable
-fun EditProfileScreen(profileViewModel: ProfileViewModel = hiltViewModel(), navController: NavController) {
+fun EditProfileScreen(
+    profileViewModel: ProfileViewModel = hiltViewModel(),
+    navController: NavController
+) {
+    val dataProfile by profileViewModel.getProfile.collectAsState()
+    val updateState by profileViewModel.updateState.collectAsState()
+    val context = LocalContext.current
 
-    val dataProfile = profileViewModel.getProfile.collectAsState()
+    var isEditMode by remember { mutableStateOf(false) }
+
+    var fullName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
+    var province by remember { mutableStateOf("") }
+    var postalCode by remember { mutableStateOf("") }
+
+    // Inisialisasi state hanya saat profile pertama kali didapat / diperbarui
+    LaunchedEffect(dataProfile) {
+        dataProfile?.let { user ->
+            fullName = user.name
+            email = user.email ?: ""
+            phone = user.no_wa ?: ""
+            address = user.alamat ?: ""
+            city = user.kota ?: ""
+            province = user.provinsi ?: ""
+            postalCode = user.kode_pos ?: ""
+        }
+    }
 
     LaunchedEffect(Unit) {
         profileViewModel.loadProfile()
     }
 
-    var isEditMode by remember {
-        mutableStateOf(false)
+    // Handle feedback response update
+    LaunchedEffect(updateState) {
+        when (val state = updateState) {
+            is ProfileUiState.Success -> {
+                android.widget.Toast.makeText(context, "Profil berhasil diperbarui!", android.widget.Toast.LENGTH_SHORT).show()
+                isEditMode = false
+                profileViewModel.resetUpdateState()
+            }
+            is ProfileUiState.Error -> {
+                android.widget.Toast.makeText(context, state.message, android.widget.Toast.LENGTH_LONG).show()
+                profileViewModel.resetUpdateState()
+            }
+            else -> {}
+        }
     }
-
-    var fullName by remember {
-        mutableStateOf("")
-    }
-
-    var email by remember {
-        mutableStateOf("")
-    }
-
-    var phone by remember {
-        mutableStateOf("")
-    }
-
-    var birthDate by remember {
-        mutableStateOf("")
-    }
-
-    var address by remember {
-        mutableStateOf("")
-    }
-
-    var city by remember {
-        mutableStateOf("")
-    }
-
-    var province by remember {
-        mutableStateOf("")
-    }
-
-    var postalCode by remember {
-        mutableStateOf("")
-    }
-
-    dataProfile.value?.let { user ->
-
-        fullName = user.name ?: ""
-        email = user.email ?: ""
-        phone = ""
-        address = ""
-        city = ""
-        province =  ""
-        postalCode = ""
-    }
-
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-
-    val datePickerDialog = DatePickerDialog(
-        context,
-        { _, year, month, day ->
-            birthDate = "$day ${month + 1} $year"
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    )
 
     Column(
         modifier = Modifier
@@ -184,7 +168,7 @@ fun EditProfileScreen(profileViewModel: ProfileViewModel = hiltViewModel(), navC
                             contentAlignment = Alignment.BottomEnd
                         ) {
 
-                            val imageUrl = dataProfile.value?.avatar_url ?: "https://i.pravatar.cc/300"
+                            val imageUrl = dataProfile?.avatar_url ?: "https://i.pravatar.cc/300"
 
 
                             AsyncImage(
@@ -325,11 +309,27 @@ fun EditProfileScreen(profileViewModel: ProfileViewModel = hiltViewModel(), navC
             }
 
             item {
+                val isLoading = updateState is ProfileUiState.Loading
 
                 Button(
                     onClick = {
-                        isEditMode = !isEditMode
+                        if (isEditMode) {
+                            if (fullName.isBlank()) {
+                                android.widget.Toast.makeText(context, "Nama lengkap tidak boleh kosong", android.widget.Toast.LENGTH_SHORT).show()
+                            } else {
+                                profileViewModel.updateProfile(
+                                    name = fullName,
+                                    alamat = address,
+                                    kota = city,
+                                    provinsi = province,
+                                    kodePos = postalCode
+                                )
+                            }
+                        } else {
+                            isEditMode = true
+                        }
                     },
+                    enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
@@ -338,17 +338,24 @@ fun EditProfileScreen(profileViewModel: ProfileViewModel = hiltViewModel(), navC
                         containerColor = PrimBlue
                     )
                 ) {
-
-                    Text(
-                        text = if (isEditMode) {
-                            "Simpan Profile"
-                        } else {
-                            "Edit Profile"
-                        },
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = SnowWhite
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = if (isEditMode) {
+                                "Simpan Profile"
+                            } else {
+                                "Edit Profile"
+                            },
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = SnowWhite
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))

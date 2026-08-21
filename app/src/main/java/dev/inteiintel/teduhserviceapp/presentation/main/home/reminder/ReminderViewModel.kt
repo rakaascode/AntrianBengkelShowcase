@@ -31,7 +31,7 @@ class ReminderViewModel @Inject constructor(
 
             _state.value = ReminderState.Loading
 
-            val result = reminderRepository.sendWhatsappReminder(noWa)
+            val result = reminderRepository.simpanAtauUpdateNoWa(noWa)
 
             result.onSuccess { response ->
                 _state.value = ReminderState.Success(response)

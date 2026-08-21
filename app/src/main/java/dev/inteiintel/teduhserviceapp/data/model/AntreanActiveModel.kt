@@ -5,6 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class AntreanActiveModelResponse(
+    val success: Boolean,
     val data: List<AntreanActiveData>
 ): Parcelable
 

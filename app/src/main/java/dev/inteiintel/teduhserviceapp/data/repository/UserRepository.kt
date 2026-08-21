@@ -18,7 +18,19 @@ class UserRepository(
         } catch (e: Exception){
             Result.failure(e)
         }
+    }
 
+    suspend fun updateProfile(request: dev.inteiintel.teduhserviceapp.data.model.UpdateProfileRequest): Result<UserData> {
+        return try {
+            val response = api.updateProfile(request)
+            if (response.success) {
+                Result.success(response.data)
+            } else {
+                Result.failure(Exception("Gagal memperbarui profile"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
 }
