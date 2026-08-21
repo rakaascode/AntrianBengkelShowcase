@@ -304,7 +304,9 @@ fun QueueTicketCard(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
                 ) {
                     Box(
                         modifier = Modifier
@@ -323,17 +325,22 @@ fun QueueTicketCard(
 
                     Spacer(modifier = Modifier.width(10.dp))
 
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = if (data.tipe_motor.isNotBlank()) data.tipe_motor else "Sepeda Motor",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
-                            color = Color(0xFF111827)
+                            fontSize = 14.sp,
+                            color = Color(0xFF111827),
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = data.nama_pemilik,
                             fontSize = 12.sp,
-                            color = Color(0xFF8B92A4)
+                            color = Color(0xFF8B92A4),
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                     }
                 }

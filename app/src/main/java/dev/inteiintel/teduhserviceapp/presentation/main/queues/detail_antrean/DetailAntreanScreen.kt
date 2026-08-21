@@ -308,17 +308,21 @@ fun DetailItemRow(
 
             Text(
                 text = label,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(0.42f)
+                    .padding(end = 8.dp),
                 fontSize = 13.sp,
                 color = Color(0xFF6B7280)
             )
 
             Text(
                 text = value.ifBlank { "-" },
+                modifier = Modifier.weight(0.58f),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF111827),
-                textAlign = TextAlign.End
+                textAlign = TextAlign.End,
+                lineHeight = 18.sp
             )
         }
 
