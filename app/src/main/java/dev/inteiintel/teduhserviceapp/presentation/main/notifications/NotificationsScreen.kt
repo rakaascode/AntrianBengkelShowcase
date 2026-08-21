@@ -2,8 +2,6 @@ package dev.inteiintel.teduhserviceapp.presentation.main.notifications
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,9 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,23 +70,6 @@ fun NotificationsScreen(
 ) {
     val notifications by viewModel.getNotificationData.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val unreadCount = notifications.count { !it.isRead }
-
-    var selectedCategory by remember { mutableStateOf("Semua") }
-    val categories = listOf("Semua", "Promo", "Antrean", "Info")
-
-    val filteredNotifications = when (selectedCategory) {
-        "Promo" -> notifications.filter { it.tipe?.lowercase()?.contains("promo") == true }
-        "Antrean" -> notifications.filter {
-            it.tipe?.lowercase()?.contains("antrian") == true ||
-                    it.tipe?.lowercase()?.contains("antrean") == true
-        }
-        "Info" -> notifications.filter {
-            it.tipe?.lowercase()?.contains("info") == true ||
-                    it.tipe?.lowercase()?.contains("pengumuman") == true
-        }
-        else -> notifications
-    }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -165,51 +142,6 @@ fun NotificationsScreen(
             }
         }
 
-        // ─── Category Filter Chips ───────────────────────────────────────────
-        // Rule 4 – Consistency & Standards + Rule 7 – Flexibility: chip mudah diklik
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            items(categories) { category ->
-                val isSelected = selectedCategory == category
-
-                // Rule 6 – Recognition over Recall: warna animasi memberikan feedback langsung
-                val bgColor by animateColorAsState(
-                    targetValue = if (isSelected) Color(0xFF0F1A65) else Color.White,
-                    animationSpec = tween(durationMillis = 200),
-                    label = "chip_bg"
-                )
-                val textColor by animateColorAsState(
-                    targetValue = if (isSelected) Color.White else Color(0xFF6B7280),
-                    animationSpec = tween(durationMillis = 200),
-                    label = "chip_text"
-                )
-
-                Box(
-                    modifier = Modifier
-                        .shadow(
-                            elevation = if (isSelected) 4.dp else 1.dp,
-                            shape = RoundedCornerShape(22.dp),
-                            ambientColor = Color(0xFF0F1A65).copy(alpha = 0.15f)
-                        )
-                        .clip(RoundedCornerShape(22.dp))
-                        .background(bgColor)
-                        .clickable { selectedCategory = category }
-                        .padding(horizontal = 18.dp, vertical = 9.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = category,
-                        fontSize = 13.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        color = textColor,
-                        letterSpacing = 0.2.sp
-                    )
-                }
-            }
-        }
 
         // ─── Content + Pull-to-Refresh ───────────────────────────────────────
         // Rule 3 – User Control & Freedom: pull-to-refresh selalu tersedia
@@ -219,7 +151,7 @@ fun NotificationsScreen(
             state = pullState,
             modifier = Modifier.fillMaxSize()
         ) {
-            if (filteredNotifications.isEmpty() && !isLoading) {
+            if (notifications.isEmpty() && !isLoading) {
                 // Rule 9 – Help Users Recognize, Diagnose, and Recover: empty state informatif
                 Column(
                     modifier = Modifier
@@ -246,10 +178,7 @@ fun NotificationsScreen(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = if (selectedCategory == "Semua")
-                            "Notifikasi promo & panggilan antrean\nakan muncul di sini"
-                        else
-                            "Tidak ada notifikasi dalam kategori\n\"$selectedCategory\"",
+                        text = "Notifikasi promo & panggilan antrean\nakan muncul di sini",
                         fontSize = 13.sp,
                         color = Color(0xFF9CA3AF),
                         textAlign = TextAlign.Center,
@@ -268,7 +197,7 @@ fun NotificationsScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(
-                        items = filteredNotifications,
+                        items = notifications,
                         key = { it.id }
                     ) { item ->
                         NotificationCard(
