@@ -1,6 +1,9 @@
 package dev.inteiintel.teduhserviceapp.presentation.auth
 
+import android.app.Activity
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -63,6 +66,9 @@ import kotlinx.coroutines.delay
  * Menampilkan slider 3 halaman onboarding ([HorizontalPager]) yang bergulir otomatis tiap 5 detik.
  * Jika pengguna sudah login (refresh token tersedia), langsung diarahkan ke [Screen.Main].
  *
+ * Login Google menggunakan [rememberLauncherForActivityResult] dengan Legacy GoogleSignInClient
+ * sehingga tidak memerlukan google-services.json.
+ *
  * @param viewModel ViewModel autentikasi, diinjeksi oleh Hilt.
  * @param navController Controller navigasi untuk berpindah ke [Screen.Main] setelah login.
  *
@@ -76,7 +82,24 @@ fun AuthLoginScreen(viewModel: AuthViewModel = hiltViewModel(), navController: N
 
     val pagerState = rememberPagerState(pageCount = {3})
 
-    val onBoardingContentState by  viewModel.getDataOnBoardingModel.collectAsState()
+    val onBoardingContentState by viewModel.getDataOnBoardingModel.collectAsState()
+
+    // Launcher untuk Google Sign-In Intent (Legacy GoogleSignInClient)
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            viewModel.handleSignInResult(
+                context = context,
+                data = result.data,
+                onError = { message ->
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                }
+            )
+        } else {
+            Toast.makeText(context, "Login Google dibatalkan", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     LaunchedEffect(pagerState) {
         while (true) {
@@ -132,9 +155,16 @@ fun AuthLoginScreen(viewModel: AuthViewModel = hiltViewModel(), navController: N
                 .padding(horizontal = 30.dp, vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(
                     onClick = {
-                        viewModel.onLoginClick (context){ message ->
-                            Toast.makeText(context,message, Toast.LENGTH_LONG).show()
-                        }
+                        viewModel.onLoginClick(
+                            context = context,
+                            onError = { message ->
+                                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                            },
+                            onReady = {
+                                val intent = viewModel.getGoogleSignInIntent(context)
+                                googleSignInLauncher.launch(intent)
+                            }
+                        )
                     },
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 1.dp ),
@@ -171,6 +201,7 @@ fun AuthLoginScreen(viewModel: AuthViewModel = hiltViewModel(), navController: N
     }
 
 }
+
 
 
 /**

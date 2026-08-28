@@ -1,21 +1,33 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Project specific ProGuard / R8 rules
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep all data models for Gson serialization/deserialization
+-keep class dev.inteiintel.teduhserviceapp.data.model.** { *; }
+-keepclassmembers class dev.inteiintel.teduhserviceapp.data.model.** { <fields>; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep Room entities and DAOs
+-keep class dev.inteiintel.teduhserviceapp.data.local.room.** { *; }
+-keepclassmembers class dev.inteiintel.teduhserviceapp.data.local.room.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Retrofit & Gson rules
+-keepattributes Signature, *Annotation*, InnerClasses, EnclosingMethod
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+-keep,allowobfuscation,allowshrinking class com.google.gson.** { *; }
+
+# OkHttp & Retrofit interfaces
+-dontwarn okhttp3.**
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepclasseswithmembers class * {
+    @retrofit2.http.* <methods>;
+}
+
+# Lottie Animation
+-keep class com.airbnb.lottie.** { *; }
+
+# Coil
+-dontwarn coil.**
+
+# Preserve line numbers for stack traces
+-keepattributes SourceFile,LineNumberTable

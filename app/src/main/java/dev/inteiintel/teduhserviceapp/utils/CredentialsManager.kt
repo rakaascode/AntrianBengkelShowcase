@@ -1,14 +1,15 @@
 package dev.inteiintel.teduhserviceapp.utils
 
 import android.content.Context
-import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import android.content.Intent
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 
 /**
  * Utilitas untuk mengeksekusi alur autentikasi Google Sign-In
- * menggunakan Credential Manager API (Android 14+ / Jetpack Credential).
+ * menggunakan Legacy GoogleSignInClient (tidak memerlukan google-services.json).
  *
  * Mengembalikan ID token Google yang selanjutnya dikirim ke server backend
  * melalui [AuthRepository.loginGoogle] untuk mendapatkan JWT aplikasi.
@@ -18,42 +19,42 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
  */
 class GoogleAuthUtils {
 
-    private fun buildRequest(webClientId: String): GetCredentialRequest {
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setServerClientId(webClientId)
-            .setFilterByAuthorizedAccounts(false)
+    /**
+     * Membuat [GoogleSignInClient] dengan konfigurasi Web Client ID.
+     *
+     * @param context Konteks Android.
+     * @param webClientId OAuth 2.0 Web Client ID dari Google Cloud Console.
+     */
+    fun buildSignInClient(context: Context, webClientId: String): GoogleSignInClient {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(webClientId)
+            .requestEmail()
             .build()
-        return GetCredentialRequest(
-            listOf(googleIdOption)
-        )
+        return GoogleSignIn.getClient(context, gso)
     }
 
     /**
-     * Memulai alur Google Sign-In dan mengembalikan ID token.
+     * Memproses hasil Intent dari [GoogleSignInClient.signInIntent] dan mengekstrak ID token.
      *
-     * Menggunakan [CredentialManager] untuk menampilkan picker akun Google.
-     * Jika pengguna membatalkan atau terjadi error, exception akan dilempar ke caller.
+     * Dipanggil setelah pengguna memilih akun Google dari picker.
      *
-     * @param context Konteks Activity/Application yang aktif.
-     * @param webClientId OAuth 2.0 Web Client ID dari Google Cloud Console.
+     * @param data Intent hasil dari activity result launcher.
      * @return ID token Google sebagai String yang siap dikirim ke backend.
-     * @throws androidx.credentials.exceptions.GetCredentialException jika login dibatalkan atau gagal.
+     * @throws ApiException jika proses sign-in gagal atau dibatalkan.
      */
-    suspend fun signInWithGoogle(
-        context: Context,
-        webClientId: String
-    ): String {
+    fun getIdTokenFromIntent(data: Intent?): String {
+        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+        val account = task.getResult(ApiException::class.java)
+        return account.idToken ?: throw IllegalStateException("ID token kosong dari Google")
+    }
 
-        val credentialManager = CredentialManager.create(context)
-        val request = buildRequest(webClientId)
-        val result = credentialManager.getCredential(
-            request = request,
-            context = context
-        )
-        val credential = result.credential
-
-        val googleIdTokenCredential = GoogleIdTokenCredential
-            .createFrom(credential.data)
-        return googleIdTokenCredential.idToken
+    /**
+     * Sign out dari GoogleSignInClient agar picker akun selalu muncul saat login berikutnya.
+     *
+     * @param context Konteks Android.
+     * @param webClientId OAuth 2.0 Web Client ID.
+     */
+    fun signOut(context: Context, webClientId: String) {
+        buildSignInClient(context, webClientId).signOut()
     }
 }

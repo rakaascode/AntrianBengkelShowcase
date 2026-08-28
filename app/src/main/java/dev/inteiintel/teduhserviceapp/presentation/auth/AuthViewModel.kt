@@ -49,6 +49,7 @@ class AuthViewModel : ViewModel() {
 
     private val _accessToken = MutableLiveData<String>()
 
+    val googleAuthUtils = GoogleAuthUtils()
 
     init {
         Log.d(TAG, "ViewModel INIT → load onboarding data")
@@ -61,15 +62,73 @@ class AuthViewModel : ViewModel() {
     }
 
     /**
-     * Memvalidasi koneksi internet terlebih dahulu lalu memulai alur login Google.
+     * Membuat Intent untuk membuka picker akun Google.
+     * Intent ini perlu di-launch dari [AuthLoginScreen] menggunakan [rememberLauncherForActivityResult].
      *
-     * Menampilkan pesan error melalui [onError] jika tidak ada koneksi atau internet tidak
-     * dapat dijangkau sebelum memanggil [loginWithGoogle].
+     * @param context Konteks Android.
+     * @return Intent Google Sign-In yang siap di-launch.
+     */
+    fun getGoogleSignInIntent(context: Context) =
+        googleAuthUtils.buildSignInClient(context, OAUTH_CLIENT_ID).signInIntent
+
+    /**
+     * Dipanggil setelah pengguna memilih akun Google dari picker (Activity Result).
+     * Mengekstrak ID token dari intent, lalu mengirim ke backend untuk mendapatkan JWT.
      *
-     * @param context Konteks Android untuk cek konektivitas dan memulai OAuth.
+     * @param context Konteks Android.
+     * @param data Intent hasil dari Activity Result launcher.
      * @param onError Callback dengan pesan error yang siap ditampilkan ke pengguna.
      */
-    fun onLoginClick(context: Context, onError: (String) -> Unit) {
+    fun handleSignInResult(
+        context: Context,
+        data: android.content.Intent?,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            _loading.value = true
+            Log.d(TAG, "handleSignInResult called")
+            try {
+                val idToken = googleAuthUtils.getIdTokenFromIntent(data)
+                Log.d(TAG, "ID token diterima, panjang: ${idToken.length}")
+
+                val repo = createRepo(context)
+                val result = repo.loginGoogle(idToken)
+
+                result.onSuccess { response ->
+                    val jwt = response.data.token
+                    _accessToken.value = jwt
+                    saveJwt(context, jwt)
+                    Log.d(TAG, "Login Google berhasil")
+                }
+
+                result.onFailure { error ->
+                    Log.e(TAG, "Login gagal dari backend: ${error.message}")
+                    onError(error.message ?: "Login gagal")
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "handleSignInResult exception: ${e.message}", e)
+                onError(e.message ?: "Login dibatalkan")
+            }
+            _loading.value = false
+        }
+    }
+
+    /**
+     * Memvalidasi koneksi internet terlebih dahulu sebelum memulai alur login Google.
+     *
+     * Menampilkan pesan error melalui [onError] jika tidak ada koneksi atau internet tidak
+     * dapat dijangkau. Jika koneksi OK, memanggil [onReady] agar UI men-launch picker akun.
+     *
+     * @param context Konteks Android untuk cek konektivitas.
+     * @param onError Callback dengan pesan error yang siap ditampilkan ke pengguna.
+     * @param onReady Callback yang dipanggil saat koneksi OK — UI harus launch Google Sign-In intent.
+     */
+    fun onLoginClick(
+        context: Context,
+        onError: (String) -> Unit,
+        onReady: () -> Unit
+    ) {
         Log.d(TAG, "Login button clicked")
 
         viewModelScope.launch {
@@ -85,47 +144,12 @@ class AuthViewModel : ViewModel() {
                 }
 
                 NetworkStatus.Available -> {
-                    Log.d(TAG, "Network OK → starting Google login")
-                    loginWithGoogle(context, onError)
+                    Log.d(TAG, "Network OK → launching Google Sign-In picker")
+                    // Sign out dulu agar picker selalu muncul
+                    googleAuthUtils.signOut(context, OAUTH_CLIENT_ID)
+                    onReady()
                 }
             }
-        }
-    }
-
-    private fun loginWithGoogle(
-        context: Context,
-        onError: (String) -> Unit
-    ) {
-        viewModelScope.launch {
-            _loading.value = true
-            Log.d(TAG, "LOGIN STARTED")
-
-            try {
-
-                val idToken = GoogleAuthUtils()
-                    .signInWithGoogle(
-                        context,
-                        OAUTH_CLIENT_ID
-                    )
-
-                val repo = createRepo(context)
-
-                val result = repo.loginGoogle(idToken)
-
-                result.onSuccess { response ->
-                    val jwt = response.data.token
-                    _accessToken.value = jwt
-                    saveJwt(context, jwt)
-                }
-
-                result.onFailure { error ->
-                    onError(error.message ?: "Login gagal")
-                }
-
-            } catch (e: Exception) {
-                onError(e.message ?: "Unknown error")
-            }
-            _loading.value = false
         }
     }
 
