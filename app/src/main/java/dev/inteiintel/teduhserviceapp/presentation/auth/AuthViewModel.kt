@@ -2,7 +2,9 @@ package dev.inteiintel.teduhserviceapp.presentation.auth
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dev.inteiintel.teduhserviceapp.R
 import dev.inteiintel.teduhserviceapp.data.local.TokenManager
 import dev.inteiintel.teduhserviceapp.data.model.OnBoardingModel
@@ -11,6 +13,7 @@ import dev.inteiintel.teduhserviceapp.data.repository.AuthRepository
 import dev.inteiintel.teduhserviceapp.utils.GoogleAuthUtils
 import dev.inteiintel.teduhserviceapp.utils.NetworkStatus
 import dev.inteiintel.teduhserviceapp.utils.NetworkUtils
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -86,6 +89,7 @@ class AuthViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             _loading.value = true
+            delay(1000)
             Log.d(TAG, "handleSignInResult called")
             try {
                 val idToken = googleAuthUtils.getIdTokenFromIntent(data)
@@ -108,7 +112,12 @@ class AuthViewModel : ViewModel() {
 
             } catch (e: Exception) {
                 Log.e(TAG, "handleSignInResult exception: ${e.message}", e)
-                onError(e.message ?: "Login dibatalkan")
+                val msg = if (e is com.google.android.gms.common.api.ApiException) {
+                    "Google Sign-In Error: [${e.statusCode}] ${e.message}"
+                } else {
+                    e.message ?: "Login gagal"
+                }
+                onError(msg)
             }
             _loading.value = false
         }

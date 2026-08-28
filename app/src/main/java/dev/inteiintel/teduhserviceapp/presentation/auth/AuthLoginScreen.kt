@@ -88,7 +88,7 @@ fun AuthLoginScreen(viewModel: AuthViewModel = hiltViewModel(), navController: N
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.data != null) {
             viewModel.handleSignInResult(
                 context = context,
                 data = result.data,
@@ -97,7 +97,7 @@ fun AuthLoginScreen(viewModel: AuthViewModel = hiltViewModel(), navController: N
                 }
             )
         } else {
-            Toast.makeText(context, "Login Google dibatalkan", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Login dibatalkan (ResultCode: ${result.resultCode})", Toast.LENGTH_SHORT).show()
         }
     }
 
