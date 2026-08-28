@@ -21,3 +21,4 @@ release
 .externalNativeBuild
 .cxx
 local.properties
+*.json

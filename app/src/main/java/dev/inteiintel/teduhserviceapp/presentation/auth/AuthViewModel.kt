@@ -130,16 +130,19 @@ class AuthViewModel : ViewModel() {
         onReady: () -> Unit
     ) {
         Log.d(TAG, "Login button clicked")
+        _loading.value = true
 
         viewModelScope.launch {
             when (val status = NetworkUtils.checkNetwork(context)) {
                 NetworkStatus.NoConnection -> {
                     Log.e(TAG, "NoConnection detected")
+                    _loading.value = false
                     onError("Tidak ada koneksi internet. Aktifkan WiFi/data ")
                 }
 
                 NetworkStatus.NoInternet -> {
                     Log.e(TAG, "NoInternet detected")
+                    _loading.value = false
                     onError("Koneksi ada tapi tidak bisa akses internet")
                 }
 
@@ -147,6 +150,7 @@ class AuthViewModel : ViewModel() {
                     Log.d(TAG, "Network OK → launching Google Sign-In picker")
                     // Sign out dulu agar picker selalu muncul
                     googleAuthUtils.signOut(context, OAUTH_CLIENT_ID)
+                    _loading.value = false
                     onReady()
                 }
             }
