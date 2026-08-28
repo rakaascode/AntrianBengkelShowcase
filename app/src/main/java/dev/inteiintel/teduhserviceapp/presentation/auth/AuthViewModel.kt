@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 
 /** Sementara Hardcoded untuk testing, Nanti di ganti menggunakan Secrets Manager **/
 private val OAUTH_CLIENT_ID =
-    "1077875078939-ba4fpbieucdqivm622c7udab9cim4ici.apps.googleusercontent.com"
+    "1077875078939-vvq878gjt8pnotjiblqreuao5422unb6.apps.googleusercontent.com"
 
 
 /**
