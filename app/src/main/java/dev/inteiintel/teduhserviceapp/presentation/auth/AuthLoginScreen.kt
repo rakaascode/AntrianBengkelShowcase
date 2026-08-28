@@ -84,23 +84,6 @@ fun AuthLoginScreen(viewModel: AuthViewModel = hiltViewModel(), navController: N
 
     val onBoardingContentState by viewModel.getDataOnBoardingModel.collectAsState()
 
-    // Launcher untuk Google Sign-In Intent (Legacy GoogleSignInClient)
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.data != null) {
-            viewModel.handleSignInResult(
-                context = context,
-                data = result.data,
-                onError = { message ->
-                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                }
-            )
-        } else {
-            Toast.makeText(context, "Login dibatalkan (ResultCode: ${result.resultCode})", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     LaunchedEffect(pagerState) {
         while (true) {
             delay(5000)
@@ -155,16 +138,9 @@ fun AuthLoginScreen(viewModel: AuthViewModel = hiltViewModel(), navController: N
                 .padding(horizontal = 30.dp, vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(
                     onClick = {
-                        viewModel.onLoginClick(
-                            context = context,
-                            onError = { message ->
-                                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                            },
-                            onReady = {
-                                val intent = viewModel.getGoogleSignInIntent(context)
-                                googleSignInLauncher.launch(intent)
-                            }
-                        )
+                        viewModel.onLoginClick(context) { message ->
+                            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                        }
                     },
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 1.dp ),
